@@ -20,15 +20,15 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 2rem 1rem; max-width: 1300px; margin: 0 auto; }
+    body { background-color: var(--bg); color: var(--text); padding: 0 1rem 2rem 1rem; max-width: 1300px; margin: 0 auto; }
 
-    /* --- MENU DE NAVEGAÇÃO SUPERIOR UNIFICADO --- */
+    /* --- MENU DE NAVEGAÇÃO INTEGRADO AO DESIGN --- */
     .top-nav {
-      background-color: #004085;
-      margin: -2rem -1rem 2rem -1rem;
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      margin: 0 -1rem 2rem -1rem;
       padding: 0 1.5rem;
-      border-radius: 8px 8px 0 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     }
     .nav-container {
       max-width: 1300px;
@@ -36,29 +36,45 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 55px;
+      height: 60px;
     }
     .nav-brand {
-      color: #ffffff;
+      color: var(--text);
       font-weight: 700;
-      font-size: 16px;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-brand::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background-color: var(--primary);
+      border-radius: 50%;
     }
     .nav-links {
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
     .nav-item {
-      color: rgba(255, 255, 255, 0.8);
+      color: var(--muted);
       text-decoration: none;
-      font-size: 14px;
+      font-size: 0.88rem;
       font-weight: 600;
-      padding: 8px 14px;
+      padding: 7px 14px;
       border-radius: 6px;
       transition: all 0.2s ease;
     }
-    .nav-item:hover, .nav-item.active {
-      color: #ffffff;
-      background-color: rgba(255, 255, 255, 0.25);
+    .nav-item:hover {
+      color: var(--primary);
+      background-color: #f1f5f9;
+    }
+    .nav-item.active {
+      color: var(--primary);
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
     }
 
     header { text-align: center; margin-bottom: 2rem; }
@@ -109,7 +125,7 @@
 </head>
 <body>
 
-  <!-- MENU DE NAVEGAÇÃO SUPERIOR -->
+  <!-- MENU DE NAVEGAÇÃO SUPERIOR INTEGRADO -->
   <nav class="top-nav">
     <div class="nav-container">
       <span class="nav-brand">Fonoaudiologia — HCPA</span>
