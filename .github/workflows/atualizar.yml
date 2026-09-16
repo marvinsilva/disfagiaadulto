@@ -1,0 +1,24 @@
+name: Atualizar Dados Diariamente
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Executa todo dia à meia-noite (horário de Brasília)
+  workflow_dispatch: # Permite rodar manualmente quando quiser
+
+jobs:
+  download-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Baixar JSON da Planilha
+        run: |
+          curl -sL "https://script.google.com/macros/s/AKfycbxrCbQZsAVjMoPzDz-6vuyLKjlMH7m0E1BlIzdtPmgSUYaoBk75O2G0UdWF_uWPD7nE/exec -o dados.json
+
+      - name: Salvar no repositório
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add dados.json
+          git diff-index --quiet HEAD || (git commit -m "bot: dados atualizados" && git push)
