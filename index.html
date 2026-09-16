@@ -1,32 +1,37 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <link rel="icon" type="image/png" href="favicon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Indicadores de Altas Disfagia Adulto - HCPA</title>
-  
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Indicadores de Altas Disfagia Adulto 2026</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
     }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 30px;
-      background-color: #f0f2f5;
-      color: #1c1e21;
-    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 2rem 1rem; max-width: 1300px; margin: 0 auto; }
 
     /* --- MENU DE NAVEGAÇÃO SUPERIOR UNIFICADO --- */
     .top-nav {
       background-color: #004085;
-      margin: -30px -30px 25px -30px;
-      padding: 0 30px;
+      margin: -2rem -1rem 2rem -1rem;
+      padding: 0 1.5rem;
+      border-radius: 8px 8px 0 0;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     .nav-container {
-      max-width: 1400px;
+      max-width: 1300px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -37,7 +42,6 @@
       color: #ffffff;
       font-weight: 700;
       font-size: 16px;
-      letter-spacing: 0.5px;
     }
     .nav-links {
       display: flex;
@@ -52,266 +56,56 @@
       border-radius: 6px;
       transition: all 0.2s ease;
     }
-    .nav-item:hover {
-      color: #ffffff;
-      background-color: rgba(255, 255, 255, 0.15);
-    }
-    .nav-item.active {
+    .nav-item:hover, .nav-item.active {
       color: #ffffff;
       background-color: rgba(255, 255, 255, 0.25);
     }
 
-    @media (max-width: 600px) {
-      .nav-container {
-        flex-direction: column;
-        height: auto;
-        padding: 10px 0;
-        gap: 8px;
-      }
-    }
+    header { text-align: center; margin-bottom: 2rem; }
+    h1 { font-size: 1.9rem; color: var(--text); }
+    .subtitle { color: var(--muted); font-size: 0.95rem; margin-top: 0.25rem; }
 
-    header {
-      margin-bottom: 20px;
-    }
-    h1 {
-      color: #004085;
-      margin: 0 0 8px 0;
-      font-size: 26px;
-    }
-    p.sub {
-      color: #6c757d;
-      margin: 0;
-      font-size: 14px;
-    }
+    /* KPIs */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .kpi-card { background: var(--card-bg); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .kpi-title { font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .kpi-value { font-size: 2rem; font-weight: 700; }
+    .kpi-sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
 
-    /* Container de Filtros */
-    .filter-container {
-      background: #ffffff;
-      padding: 18px 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      margin-bottom: 25px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      align-items: flex-end;
-    }
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      flex: 1;
-      min-width: 260px;
-    }
-    .filter-label {
-      font-weight: bold;
-      color: #004085;
-      font-size: 14px;
-      margin-bottom: 8px;
-      display: block;
-    }
+    /* Layout de Gráficos */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    @media (max-width: 850px) { .charts-grid { grid-template-columns: 1fr; } }
 
-    .dropdown-btn {
-      width: 100%;
-      padding: 10px 14px;
-      border-radius: 6px;
-      border: 1px solid #ced4da;
-      background-color: #fff;
-      text-align: left;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #333;
-    }
-    .dropdown-btn:after {
-      content: "▼";
-      font-size: 10px;
-      color: #6c757d;
-    }
+    .panel { background: var(--card-bg); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .panel-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
 
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      width: 100%;
-      min-width: 300px;
-      background-color: #ffffff;
-      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.15);
-      border-radius: 6px;
-      border: 1px solid #e0e0e0;
-      padding: 10px;
-      z-index: 100;
-      margin-top: 5px;
-    }
-    .dropdown-content.show {
-      display: block;
-    }
+    /* Container do Gráfico de Rosca */
+    .chart-container-large { position: relative; height: 350px; width: 100%; display: flex; justify-content: center; align-items: center; }
 
-    .date-inputs {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .date-picker {
-      padding: 9px 12px;
-      border-radius: 6px;
-      border: 1px solid #ced4da;
-      font-size: 14px;
-      color: #333;
-      background-color: #fff;
-      font-family: inherit;
-      outline: none;
-      flex: 1;
-      min-width: 120px;
-    }
-    .date-picker:focus {
-      border-color: #0056b3;
-    }
-    .btn-clear-date {
-      background-color: #e9ecef;
-      border: 1px solid #ced4da;
-      color: #495057;
-      padding: 9px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-    .btn-clear-date:hover {
-      background-color: #dc3545;
-      color: #ffffff;
-      border-color: #dc3545;
-    }
+    /* Tabela e Busca */
+    .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
+    .search-input { width: 100%; max-width: 350px; padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 0.9rem; }
+    .search-input:focus { border-color: var(--primary); }
 
-    .btn-export-pdf {
-      background-color: #28a745;
-      color: #ffffff;
-      border: 1px solid #28a745;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-      height: 40px;
-    }
-    .btn-export-pdf:hover {
-      background-color: #218838;
-      border-color: #1e7e34;
-    }
+    .table-container { overflow-x: auto; max-height: 450px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left; }
+    th { background: #f1f5f9; color: var(--muted); padding: 0.75rem 1rem; position: sticky; top: 0; font-weight: 600; border-bottom: 2px solid var(--border); z-index: 2; }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+    tr:hover { background-color: #f8fafc; }
 
-    .file-input-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #eef2f7;
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: 1px dashed #0056b3;
-    }
+    .badge { padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+    .badge-alta { background: #d1fae5; color: #065f46; }
+    .badge-obito { background: #fee2e2; color: #991b1b; }
+    .badge-outro { background: #f1f5f9; color: #475569; }
 
-    .search-box {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 8px;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-      font-size: 13px;
-    }
+    /* Paginação */
+    .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 0.85rem; color: var(--muted); }
+    .pagination-btn { background: var(--bg); border: 1px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 5px; cursor: pointer; }
+    .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .checkbox-list {
-      max-height: 200px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .checkbox-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: #333;
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 4px;
-    }
-    .checkbox-item:hover {
-      background-color: #f0f4f8;
-    }
-
-    /* KPI Grid */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-    .kpi-card {
-      background: #ffffff;
-      padding: 16px 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      border-left: 5px solid #0056b3;
-    }
-    .kpi-card h3 {
-      margin: 0 0 8px 0;
-      font-size: 11px;
-      color: #6c757d;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .kpi-card p {
-      margin: 0;
-      font-size: 24px;
-      font-weight: bold;
-      color: #1c1e21;
-    }
-
-    /* Charts Grid */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 25px;
-    }
-    .chart-card {
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    .chart-card h2 {
-      font-size: 15px;
-      margin-top: 0;
-      margin-bottom: 15px;
-      color: #333;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 40px;
-      padding: 20px 0 10px 0;
-      font-size: 12px;
-      color: #8c98a4;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-    }
+    footer { text-align: center; margin-top: 2.5rem; padding-bottom: 1rem; }
+    footer .dev-credits { font-weight: 600; color: var(--text); font-size: 0.9rem; }
   </style>
-
-  <!-- Bibliotecas Base -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-  
-  <!-- Bibliotecas para Gerar PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -328,630 +122,354 @@
 
   <header>
     <h1>Indicadores de Altas Disfagia Adulto</h1>
-    <p class="sub">Acompanhamento de desfechos, dietas prescritas e orientações fonoaudiológicas</p>
+    <p class="subtitle">Acompanhamento de desfechos, dietas prescritas e orientações fonoaudiológicas</p>
   </header>
 
-  <div class="filter-container">
-    <!-- Seleção / Carga do CSV -->
-    <div class="filter-group" style="max-width: 300px;">
-      <span class="filter-label">Carregar Arquivo CSV:</span>
-      <div class="file-input-wrapper">
-        <input type="file" id="input-csv" accept=".csv" onchange="carregarCSVManual(event)" style="font-size: 13px; width: 100%;">
-      </div>
-    </div>
-
-    <!-- Filtro 1: Áreas de Atendimento -->
-    <div class="filter-group">
-      <span class="filter-label">Filtrar por Área(s) de Atendimento:</span>
-      <button id="btn-dropdown" class="dropdown-btn" onclick="alternarDropdown()">
-        <span id="btn-text">Todas as Áreas selecionadas</span>
-      </button>
-      <div id="dropdown-list" class="dropdown-content">
-        <input type="text" id="input-busca" class="search-box" placeholder="Pesquisar área..." onkeyup="filtrarListaOpcoes()">
-        <div class="checkbox-list">
-          <label class="checkbox-item">
-            <input type="checkbox" id="chk-todos" checked onchange="marcarTodos(this)">
-            <b>-- Selecionar Todas --</b>
-          </label>
-          <hr style="border: 0; border-top: 1px solid #eee; margin: 4px 0;">
-          <div id="lista-checkboxes"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filtro 2: Seletor de Datas -->
-    <div class="filter-group">
-      <span class="filter-label">Filtrar por Período:</span>
-      <div class="date-inputs">
-        <input type="date" id="dt-inicio" class="date-picker" onchange="aplicarFiltro()" title="Data Inicial">
-        <span style="font-size: 13px; color: #6c757d;">até</span>
-        <input type="date" id="dt-fim" class="date-picker" onchange="aplicarFiltro()" title="Data Final">
-        <button type="button" class="btn-clear-date" onclick="limparFiltroDatas()" title="Limpar Período">Limpar</button>
-      </div>
-    </div>
-
-    <!-- Botão Exportar PDF -->
-    <div class="filter-group" style="min-width: auto; flex: initial;">
-      <button type="button" class="btn-export-pdf" onclick="abrirModalPDF()" title="Exportar Relatório PDF">
-        📄 PDF
-      </button>
-    </div>
-  </div>
-
-  <!-- Grid de Cards de KPI -->
-  <div class="kpi-grid pdf-block" data-pdf-nome="Resumo de Indicadores (KPIs)">
+  <!-- KPIs -->
+  <section class="kpi-grid">
     <div class="kpi-card">
-      <h3>Total de Altas</h3>
-      <p id="kpi-total-altas">-</p>
+      <div class="kpi-title">Total de Pacientes</div>
+      <div class="kpi-value" id="kpiTotal">0</div>
     </div>
-    
-    <div class="kpi-card" style="border-left-color: #28a745;">
-      <h3>Retorno VO Exclusivo</h3>
-      <p id="kpi-pct-vo-exclusiva">-</p>
+    <div class="kpi-card">
+      <div class="kpi-title">Altas</div>
+      <div class="kpi-value" style="color: var(--success);" id="kpiAltas">0</div>
+      <div class="kpi-sub" id="pctAltas">0% do total</div>
     </div>
-
-    <div class="kpi-card" style="border-left-color: #17a2b8;">
-      <h3>Via de Alimentação Alternativa</h3>
-      <p id="kpi-pct-via-alternativa">-</p>
+    <div class="kpi-card">
+      <div class="kpi-title">Óbitos</div>
+      <div class="kpi-value" style="color: var(--danger);" id="kpiObitos">0</div>
+      <div class="kpi-sub" id="pctObitos">0% do total</div>
     </div>
-
-    <div class="kpi-card" style="border-left-color: #ffc107;">
-      <h3>Decanulação TQT</h3>
-      <p id="kpi-decanulacao">-</p>
+    <div class="kpi-card">
+      <div class="kpi-title">Com Orientações de Alta</div>
+      <div class="kpi-value" style="color: var(--purple);" id="kpiOrientacoes">0</div>
     </div>
+  </section>
 
-    <div class="kpi-card" style="border-left-color: #fd7e14;">
-      <h3>Nível FOIS Médio Alta</h3>
-      <p id="kpi-fois-medio-alta">-</p>
-    </div>
-
-    <div class="kpi-card" style="border-left-color: #e83e8c;">
-      <h3>Ganho FOIS Médio</h3>
-      <p id="kpi-ganho-fois-medio">-</p>
-    </div>
-  </div>
-
-  <!-- Gráficos Gerenciais e Clínicos -->
-  <div class="charts-grid">
-    <div class="chart-card pdf-block" data-pdf-nome="Gráfico: Desfecho da Assistência Fonoaudiológica">
-      <h2>Desfecho da Assistência Fonoaudiológica</h2>
-      <canvas id="graficoDesfecho"></canvas>
-    </div>
-
-    <div class="chart-card pdf-block" data-pdf-nome="Gráfico: Vias de Alimentação na Alta">
-      <h2>Via de Alimentação na Alta</h2>
-      <canvas id="graficoViasAlta"></canvas>
-    </div>
-
-    <div class="chart-card pdf-block" data-pdf-nome="Gráfico: Consistências de Dieta Prescritas">
-      <h2>Consistências de Dieta na Alta</h2>
-      <canvas id="graficoConsistencias"></canvas>
-    </div>
-
-    <div class="chart-card pdf-block" data-pdf-nome="Gráfico: Distribuição FOIS na Alta">
-      <h2>Distribuição FOIS na Alta</h2>
-      <canvas id="graficoFoisAlta"></canvas>
-    </div>
-
-    <div class="chart-card pdf-block" data-pdf-nome="Gráfico: Status de Traqueostomia na Alta">
-      <h2>Status de Traqueostomia na Alta</h2>
-      <canvas id="graficoTQTAlta"></canvas>
-    </div>
-
-    <div class="chart-card pdf-block" data-pdf-nome="Gráfico: Orientações de Alta">
-      <h2>Orientações Fonoaudiológicas</h2>
-      <canvas id="graficoOrientacoes"></canvas>
-    </div>
-  </div>
-
-  <!-- Modal de Seleção para Exportação em PDF -->
-  <div id="modal-exportar-pdf" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-    <div style="background: #fff; padding: 25px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-      <h3 style="margin-top: 0; color: #004085;">Selecione os blocos para o PDF</h3>
-      <p style="font-size: 13px; color: #6c757d;">Marque apenas as informações que deseja incluir no relatório:</p>
-      
-      <div id="container-checkboxes-pdf" style="display: flex; flex-direction: column; gap: 8px; margin: 15px 0;"></div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-        <button type="button" class="btn-clear-date" onclick="fecharModalPDF()">Cancelar</button>
-        <button type="button" class="btn-export-pdf" onclick="processarPDFSelecionado()">Gerar PDF</button>
+  <!-- GRÁFICOS -->
+  <section class="charts-grid">
+    <div class="panel">
+      <h2 class="panel-title">Proporção por Desfecho</h2>
+      <div class="chart-container-large">
+        <canvas id="chartSituacao"></canvas>
       </div>
     </div>
-  </div>
+
+    <div class="panel">
+      <h2 class="panel-title">Distribuição por Dieta na Saída</h2>
+      <div class="chart-container-large">
+        <canvas id="chartDieta"></canvas>
+      </div>
+    </div>
+
+    <div class="panel" style="grid-column: 1 / -1;">
+      <h2 class="panel-title">Top Setores com mais Desfechos</h2>
+      <canvas id="chartLocal" style="max-height: 300px;"></canvas>
+    </div>
+  </section>
+
+  <!-- TABELA DE PACIENTES -->
+  <section class="panel">
+    <div class="controls">
+      <h2 class="panel-title" style="margin-bottom:0;">Lista Completa de Pacientes</h2>
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar por paciente, prontuário, dieta, local...">
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Local</th>
+            <th>Prontuário</th>
+            <th>Paciente</th>
+            <th>Dieta</th>
+            <th>Situação</th>
+            <th>Orientações de Alta</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaBody">
+          <tr><td colspan="6" style="text-align: center;">Carregando dados...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <span id="pageInfo">Página 1</span>
+      <div>
+        <button id="btnPrev" class="pagination-btn" onclick="mudarPagina(-1)">Anterior</button>
+        <button id="btnNext" class="pagination-btn" onclick="mudarPagina(1)">Próxima</button>
+      </div>
+    </div>
+  </section>
 
   <footer>
-    Dashboard Desenvolvido por Fgo Marvin Azevedo
+    <p class="dev-credits">Desenvolvido por Fgo Marvin Azevedo</p>
   </footer>
 
   <script>
-    if (typeof ChartDataLabels !== 'undefined') {
-      Chart.register(ChartDataLabels);
-    }
+    let listaPacientes = [];
+    let listaFiltrada = [];
+    let paginaAtual = 1;
+    const itensPorPagina = 50;
 
-    const NOME_ARQUIVO_CSV = "ALTAS.csv";
-    let dadosBrutosCSV = [];
+    // CORES MÃE (Sólidas e Vibrantes para Gráfico de Rosca)
+    const mapaCoresDesfecho = {
+      'Alta hospitalar': '#22c55e',            // Verde Vibrante
+      'Alta fonoaudiológica': '#3b82f6',       // Azul Padrão
+      'Óbito': '#334155',                      // Grafite/Escuro
+      'Transf externa': '#f97316',             // Laranja Sólido
+      'Transf NEUROFONO': '#0284c7',           // Azul Petróleo / Oceano
+      'Alta para enfermaria (EMA)': '#eab308',  // Amarelo Ouro / Cru
+      'Transf CTI': '#8b5cf6',                 // Roxo Vivo
+      'Encerrada por piora clínica': '#15803d',// Verde Escuro Fechado
+      'Outros': '#94a3b8'                      // Cinza Neutro
+    };
 
-    function destruirGraficoSeExistir(idCanvas) {
-      const chartExistente = Chart.getChart(idCanvas);
-      if (chartExistente) {
-        chartExistente.destroy();
-      }
-    }
+    // Unificação de Setores (EMA e CTI)
+    function normalizarLocal(texto) {
+      if (!texto) return 'Não informado';
+      let str = String(texto).trim();
+      let upper = str.toUpperCase();
 
-    function converterParaNumero(valor) {
-      if (!valor) return NaN;
-      if (typeof valor === 'number') return valor;
-      const limpo = String(valor).replace(',', '.').trim();
-      return parseFloat(limpo);
-    }
-
-    function extrairDataISO(stringDataHora) {
-      if (!stringDataHora || String(stringDataHora).trim() === '') return null;
-      const texto = String(stringDataHora).trim();
-      if (texto.includes('/')) {
-        const partes = texto.split(' ')[0].split('/');
-        if (partes.length === 3) {
-          const dia = partes[0].padStart(2, '0');
-          const mes = partes[1].padStart(2, '0');
-          const ano = partes[2].length === 2 ? '20' + partes[2] : partes[2];
-          return `${ano}-${mes}-${dia}`;
-        }
-      } else if (texto.includes('-')) {
-        return texto.split(' ')[0];
-      }
-      return null;
-    }
-
-    function alternarDropdown() {
-      document.getElementById('dropdown-list').classList.toggle('show');
-    }
-
-    window.onclick = function(event) {
-      if (!event.target.matches('.dropdown-btn') && !event.target.closest('.dropdown-content')) {
-        const dropdowns = document.getElementsByClassName("dropdown-content");
-        for (let i = 0; i < dropdowns.length; i++) {
-          dropdowns[i].classList.remove('show');
-        }
-      }
-    }
-
-    function filtrarListaOpcoes() {
-      const termo = document.getElementById('input-busca').value.toLowerCase();
-      const itens = document.querySelectorAll('#lista-checkboxes .checkbox-item');
-      itens.forEach(item => {
-        const texto = item.textContent.toLowerCase();
-        item.style.display = texto.includes(termo) ? 'flex' : 'none';
-      });
-    }
-
-    function preencherOpcoesDeFiltro(linhas) {
-      const conteiner = document.getElementById('lista-checkboxes');
-      conteiner.innerHTML = '';
-      const areasUnicas = new Set();
-      linhas.forEach(linha => {
-        const local = linha['LOCAL_ATEND'] || linha['UNIDADE'];
-        if (local && String(local).trim() !== '') {
-          areasUnicas.add(String(local).trim());
-        }
-      });
-      Array.from(areasUnicas).sort().forEach(area => {
-        const label = document.createElement('label');
-        label.className = 'checkbox-item';
-        const chk = document.createElement('input');
-        chk.type = 'checkbox';
-        chk.value = area;
-        chk.checked = true;
-        chk.className = 'chk-area';
-        chk.onchange = aplicarFiltro;
-        label.appendChild(chk);
-        label.appendChild(document.createTextNode(area));
-        conteiner.appendChild(label);
-      });
-    }
-
-    function configurarLimitesDatas(linhas) {
-      let minData = null;
-      let maxData = null;
-
-      linhas.forEach(linha => {
-        const dAlta = extrairDataISO(linha['DATA_ALTA'] || linha['DTHR_RESPOSTA']);
-        if (dAlta) {
-          if (!minData || dAlta < minData) minData = dAlta;
-          if (!maxData || dAlta > maxData) maxData = dAlta;
-        }
-      });
-
-      const inputInicio = document.getElementById('dt-inicio');
-      const inputFim = document.getElementById('dt-fim');
-
-      if (minData && maxData) {
-        inputInicio.min = minData;
-        inputInicio.max = maxData;
-        inputFim.min = minData;
-        inputFim.max = maxData;
-      }
-    }
-
-    function marcarTodos(source) {
-      const checkboxes = document.querySelectorAll('.chk-area');
-      checkboxes.forEach(chk => chk.checked = source.checked);
-      aplicarFiltro();
-    }
-
-    function limparFiltroDatas() {
-      document.getElementById('dt-inicio').value = '';
-      document.getElementById('dt-fim').value = '';
-      aplicarFiltro();
-    }
-
-    function carregarCSVManual(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const buffer = e.target.result;
-        let texto;
-        try {
-          const decoder = new TextDecoder('utf-8', { fatal: true });
-          texto = decoder.decode(buffer);
-        } catch (err) {
-          const decoder = new TextDecoder('iso-8859-1');
-          texto = decoder.decode(buffer);
-        }
-
-        Papa.parse(texto, {
-          header: true,
-          skipEmptyLines: true,
-          transformHeader: function(header) {
-            return header.replace(/^\uFEFF/, '').trim();
-          },
-          complete: function(results) {
-            if (results.data && results.data.length > 0) {
-              dadosBrutosCSV = results.data;
-              preencherOpcoesDeFiltro(dadosBrutosCSV);
-              configurarLimitesDatas(dadosBrutosCSV);
-              processarDadosCSV(dadosBrutosCSV);
-            } else {
-              alert("O arquivo selecionado está vazio ou incorreto.");
-            }
-          },
-          error: function(err) {
-            alert("Erro ao ler o arquivo CSV: " + err);
-          }
-        });
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function aplicarFiltro() {
-      const checkboxes = document.querySelectorAll('.chk-area');
-      const selecionadas = Array.from(checkboxes).filter(chk => chk.checked).map(chk => chk.value);
-      const chkTodos = document.getElementById('chk-todos');
-      const btnText = document.getElementById('btn-text');
-
-      if (selecionadas.length === checkboxes.length) {
-        btnText.innerText = "Todas as Áreas selecionadas";
-        chkTodos.checked = true;
-      } else if (selecionadas.length === 0) {
-        btnText.innerText = "Nenhuma área selecionada";
-        chkTodos.checked = false;
-      } else {
-        btnText.innerText = `${selecionadas.length} área(s) selecionada(s)`;
-        chkTodos.checked = false;
+      // Regra 1: Prioridade EMA (se tiver EMA/UAD/Emergência, fica como EMA mesmo se tiver CTI)
+      if (upper.includes('EMA') || upper.includes('UAD') || upper.includes('EMERGÊNCIA') || upper.includes('EMERGENCIA')) {
+        return 'EMA';
       }
 
-      let dadosFiltrados = dadosBrutosCSV;
-
-      if (selecionadas.length < checkboxes.length) {
-        dadosFiltrados = dadosFiltrados.filter(linha => {
-          const local = linha['LOCAL_ATEND'] || linha['UNIDADE'];
-          return local && selecionadas.includes(String(local).trim());
-        });
+      // Regra 2: Unificação de CTI
+      if (upper.includes('CTI')) {
+        return 'CTI';
       }
 
-      const dtInicio = document.getElementById('dt-inicio').value;
-      const dtFim = document.getElementById('dt-fim').value;
-
-      if (dtInicio || dtFim) {
-        dadosFiltrados = dadosFiltrados.filter(linha => {
-          const dRef = extrairDataISO(linha['DATA_ALTA'] || linha['DTHR_RESPOSTA']);
-          if (!dRef) return false;
-          if (dtInicio && dRef < dtInicio) return false;
-          if (dtFim && dRef > dtFim) return false;
-          return true;
-        });
-      }
-
-      processarDadosCSV(dadosFiltrados);
+      return str;
     }
 
-    function processarDadosCSV(linhas) {
-      let totalAltas = linhas.length;
-      let qtdVOExclusiva = 0;
-      let qtdViaAlternativa = 0;
-      let qtdDecanulados = 0;
-      let somaFoisAlta = 0;
-      let qtdFoisValido = 0;
-      let somaGanhoFois = 0;
-      let qtdGanhoValido = 0;
+    function normalizarDesfecho(texto) {
+      if (!texto) return 'Outros';
+      const s = texto.toLowerCase();
 
-      const desfechos = {};
-      const viasAlta = {};
-      const consistencias = {};
-      const foisDistribuicao = { 'Nível 1-3': 0, 'Nível 4-5': 0, 'Nível 6-7': 0 };
-      const statusTQT = { 'Sem TQT': 0, 'Decanulado': 0, 'Mantido TQT': 0 };
-      const orientacoes = {};
+      if (s.includes('hospitalar')) return 'Alta hospitalar';
+      if (s.includes('fono')) return 'Alta fonoaudiológica';
+      if (s.includes('obito') || s.includes('óbito')) return 'Óbito';
+      if (s.includes('externa') || s.includes('outro hospital')) return 'Transf externa';
+      if (s.includes('neurofono')) return 'Transf NEUROFONO';
+      if (s.includes('ema') || s.includes('enfermaria')) return 'Alta para enfermaria (EMA)';
+      if (s.includes('cti')) return 'Transf CTI';
+      if (s.includes('piora')) return 'Encerrada por piora clínica';
 
-      linhas.forEach(linha => {
-        const desfecho = linha['DESFECHO'] || 'Alta Hospitalar';
-        desfechos[desfecho] = (desfechos[desfecho] || 0) + 1;
+      return 'Outros';
+    }
 
-        const via = linha['VIA_ALIMENTACAO_ALTA'] || linha['VIA_ALTA'] || 'Via Oral';
-        viasAlta[via] = (viasAlta[via] || 0) + 1;
+    function anonimizarNome(nome) {
+      if (!nome) return 'Paciente Anônimo';
+      return nome.split(' ').map(parte => {
+        if (parte.length <= 2) return parte;
+        return parte[0] + '***';
+      }).join(' ');
+    }
 
-        if (via.toUpperCase().includes('VO EXCLUSIVA') || via.toUpperCase().includes('VIA ORAL')) {
-          qtdVOExclusiva++;
-        } else if (via.toUpperCase().includes('SNE') || via.toUpperCase().includes('GTT') || via.toUpperCase().includes('MISTA')) {
-          qtdViaAlternativa++;
-        }
+    function anonimizarProntuario(pront) {
+      if (!pront || pront === '-') return '-';
+      const str = String(pront).trim();
+      if (str.length <= 3) return '***';
+      return '***' + str.slice(-3);
+    }
 
-        const consist = linha['CONSISTENCIA_DIETA'] || 'Não Informado';
-        consistencias[consist] = (consistencias[consist] || 0) + 1;
+    fetch('dados.json')
+      .then(res => res.json())
+      .then(matriz => {
+        if (!matriz || matriz.length <= 1) return;
 
-        const foisAlta = converterParaNumero(linha['FOIS_ALTA']);
-        if (!isNaN(foisAlta)) {
-          somaFoisAlta += foisAlta;
-          qtdFoisValido++;
-          if (foisAlta <= 3) foisDistribuicao['Nível 1-3']++;
-          else if (foisAlta <= 5) foisDistribuicao['Nível 4-5']++;
-          else foisDistribuicao['Nível 6-7']++;
-        }
+        const cabecalhos = matriz[0].map(c => String(c).trim().toLowerCase());
+        const idxLocal = cabecalhos.findIndex(c => c.includes('local'));
+        const idxPront = cabecalhos.findIndex(c => c.includes('prontu'));
+        const idxNome = cabecalhos.findIndex(c => c.includes('nome') || c.includes('paciente'));
+        const idxDieta = cabecalhos.findIndex(c => c.includes('dieta'));
+        const idxSituacao = cabecalhos.findIndex(c => c.includes('situa') || c.includes('desfecho'));
+        const idxOrient = cabecalhos.findIndex(c => c.includes('orienta'));
 
-        const foisEntrada = converterParaNumero(linha['FOIS_ENTRADA']);
-        if (!isNaN(foisAlta) && !isNaN(foisEntrada)) {
-          somaGanhoFois += (foisAlta - foisEntrada);
-          qtdGanhoValido++;
-        }
+        listaPacientes = matriz.slice(1).map(row => {
+          const nomeBruto = String(row[idxNome] || '').trim();
+          if (!nomeBruto) return null;
 
-        const tqtStatus = linha['STATUS_TQT'] || 'Sem TQT';
-        if (tqtStatus.toUpperCase().includes('DECANULADO')) {
-          qtdDecanulados++;
-          statusTQT['Decanulado']++;
-        } else if (tqtStatus.toUpperCase().includes('MANTIDO') || tqtStatus.toUpperCase().includes('COM TQT')) {
-          statusTQT['Mantido TQT']++;
-        } else {
-          statusTQT['Sem TQT']++;
-        }
+          const desfechoPadrao = normalizarDesfecho(String(row[idxSituacao] || ''));
+          const localPadrao = normalizarLocal(row[idxLocal]);
 
-        const orient = linha['ORIENTACAO'] || 'Sem Orientações Específicas';
-        orientacoes[orient] = (orientacoes[orient] || 0) + 1;
+          return {
+            local: localPadrao,
+            prontuario: anonimizarProntuario(row[idxPront]),
+            nome: anonimizarNome(nomeBruto),
+            dieta: String(row[idxDieta] || 'Sem informação').trim(),
+            situacao: desfechoPadrao,
+            orientacoes: String(row[idxOrient] || '').trim()
+          };
+        }).filter(p => p !== null);
+
+        listaFiltrada = [...listaPacientes];
+        montarDashboard();
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('tabelaBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Erro ao carregar os dados.</td></tr>`;
       });
 
-      document.getElementById('kpi-total-altas').innerText = totalAltas;
-      document.getElementById('kpi-pct-vo-exclusiva').innerText = totalAltas > 0 ? ((qtdVOExclusiva / totalAltas) * 100).toFixed(1) + "%" : "0%";
-      document.getElementById('kpi-pct-via-alternativa').innerText = totalAltas > 0 ? ((qtdViaAlternativa / totalAltas) * 100).toFixed(1) + "%" : "0%";
-      document.getElementById('kpi-decanulacao').innerText = qtdDecanulados;
-      document.getElementById('kpi-fois-medio-alta').innerText = qtdFoisValido > 0 ? (somaFoisAlta / qtdFoisValido).toFixed(1) : "N/D";
-      document.getElementById('kpi-ganho-fois-medio').innerText = qtdGanhoValido > 0 ? "+" + (somaGanhoFois / qtdGanhoValido).toFixed(1) : "N/D";
+    function montarDashboard() {
+      const total = listaPacientes.length;
+      let altas = 0, obitos = 0, comOrientacao = 0;
+      const contagemDieta = {}, contagemLocal = {}, contagemSituacao = {};
 
-      renderizarGraficoPizza('graficoDesfecho', Object.keys(desfechos), Object.values(desfechos));
-      renderizarGraficoPizza('graficoViasAlta', Object.keys(viasAlta), Object.values(viasAlta));
-      renderizarGraficoBarraHorizontal('graficoConsistencias', Object.keys(consistencias), Object.values(consistencias), '#0056b3');
-      renderizarGraficoBarrasVertical('graficoFoisAlta', Object.keys(foisDistribuicao), Object.values(foisDistribuicao), '#28a745');
-      renderizarGraficoPizza('graficoTQTAlta', Object.keys(statusTQT), Object.values(statusTQT));
-      renderizarGraficoBarraHorizontal('graficoOrientacoes', Object.keys(orientacoes), Object.values(orientacoes), '#17a2b8');
-    }
+      listaPacientes.forEach(p => {
+        const sitLower = p.situacao.toLowerCase();
+        if (sitLower.includes('alta')) altas++;
+        else if (sitLower.includes('obito') || sitLower.includes('óbito')) obitos++;
 
-    function renderizarGraficoPizza(idCanvas, rotulos, dados) {
-      destruirGraficoSeExistir(idCanvas);
-      const ctx = document.getElementById(idCanvas).getContext('2d');
-      new Chart(ctx, {
+        if (p.orientacoes && p.orientacoes.length > 2) comOrientacao++;
+
+        contagemSituacao[p.situacao] = (contagemSituacao[p.situacao] || 0) + 1;
+        contagemDieta[p.dieta] = (contagemDieta[p.dieta] || 0) + 1;
+        contagemLocal[p.local] = (contagemLocal[p.local] || 0) + 1;
+      });
+
+      const situacoesOrdenadas = Object.entries(contagemSituacao)
+        .sort((a, b) => b[1] - a[1]);
+
+      const labelsGrafico = situacoesOrdenadas.map(i => i[0]);
+      const valoresGrafico = situacoesOrdenadas.map(i => i[1]);
+      const coresGrafico = labelsGrafico.map(label => mapaCoresDesfecho[label] || mapaCoresDesfecho['Outros']);
+
+      // Atualizar KPIs
+      document.getElementById('kpiTotal').textContent = total.toLocaleString('pt-BR');
+      document.getElementById('kpiAltas').textContent = altas.toLocaleString('pt-BR');
+      document.getElementById('pctAltas').textContent = total ? `${((altas/total)*100).toFixed(1)}% do total` : '0%';
+      document.getElementById('kpiObitos').textContent = obitos.toLocaleString('pt-BR');
+      document.getElementById('pctObitos').textContent = total ? `${((obitos/total)*100).toFixed(1)}% do total` : '0%';
+      document.getElementById('kpiOrientacoes').textContent = comOrientacao.toLocaleString('pt-BR');
+
+      // Gráfico de Rosca
+      new Chart(document.getElementById('chartSituacao'), {
         type: 'doughnut',
         data: {
-          labels: rotulos,
-          datasets: [{ data: dados, backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#17a2b8'] }]
+          labels: labelsGrafico,
+          datasets: [{
+            data: valoresGrafico,
+            backgroundColor: coresGrafico,
+            borderWidth: 2,
+            borderColor: '#ffffff',
+            hoverOffset: 6
+          }]
         },
-        options: { 
+        options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
-            datalabels: {
-              color: '#fff', font: { weight: 'bold', size: 11 },
-              formatter: (value, ctx) => {
-                let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                if (sum === 0 || value === 0) return '';
-                let perc = (value * 100 / sum);
-                return perc < 5 ? '' : parseFloat(perc.toFixed(1)) + "%";
+            legend: {
+              position: 'bottom',
+              labels: { 
+                font: { size: 11, weight: '500' }, 
+                padding: 12,
+                boxWidth: 14
               }
             }
           }
         }
       });
-    }
 
-    function renderizarGraficoBarraHorizontal(idCanvas, rotulos, dados, cor) {
-      destruirGraficoSeExistir(idCanvas);
-      const ctx = document.getElementById(idCanvas).getContext('2d');
-      new Chart(ctx, {
+      // Gráfico de Dietas
+      const topDietas = Object.entries(contagemDieta).sort((a,b) => b[1] - a[1]).slice(0, 6);
+      new Chart(document.getElementById('chartDieta'), {
         type: 'bar',
         data: {
-          labels: rotulos,
-          datasets: [{ data: dados, backgroundColor: cor, borderRadius: 4 }]
-        },
-        options: {
-          indexAxis: 'y', responsive: true,
-          plugins: { legend: { display: false }, datalabels: { display: false } },
-          scales: { x: { beginAtZero: true } }
-        }
-      });
-    }
-
-    function renderizarGraficoBarrasVertical(idCanvas, rotulos, dados, cor) {
-      destruirGraficoSeExistir(idCanvas);
-      const ctx = document.getElementById(idCanvas).getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: rotulos,
-          datasets: [{ data: dados, backgroundColor: cor, borderRadius: 4 }]
+          labels: topDietas.map(i => i[0]),
+          datasets: [{
+            label: 'Nº de Pacientes',
+            data: topDietas.map(i => i[1]),
+            backgroundColor: '#8b5cf6',
+            borderRadius: 6
+          }]
         },
         options: {
           responsive: true,
-          plugins: { legend: { display: false }, datalabels: { display: false } },
-          scales: { y: { beginAtZero: true } }
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
         }
       });
-    }
 
-    function abrirModalPDF() {
-      const container = document.getElementById('container-checkboxes-pdf');
-      container.innerHTML = '';
-      const blocos = document.querySelectorAll('.pdf-block');
-      
-      blocos.forEach((bloco, index) => {
-        const nome = bloco.getAttribute('data-pdf-nome') || `Bloco ${index + 1}`;
-        const label = document.createElement('label');
-        label.style.cssText = 'display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer;';
-        
-        const chk = document.createElement('input');
-        chk.type = 'checkbox';
-        chk.checked = true;
-        chk.className = 'chk-pdf-item';
-        chk.value = index;
-
-        label.appendChild(chk);
-        label.appendChild(document.createTextNode(nome));
-        container.appendChild(label);
+      // Gráfico de Locais (Com EMA e CTI Unificados)
+      const topLocais = Object.entries(contagemLocal).sort((a,b) => b[1] - a[1]).slice(0, 10);
+      new Chart(document.getElementById('chartLocal'), {
+        type: 'bar',
+        data: {
+          labels: topLocais.map(i => i[0]),
+          datasets: [{
+            label: 'Pacientes por Setor',
+            data: topLocais.map(i => i[1]),
+            backgroundColor: '#3b82f6',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } }
+        }
       });
 
-      document.getElementById('modal-exportar-pdf').style.display = 'flex';
+      renderTabela();
     }
 
-    function fecharModalPDF() {
-      document.getElementById('modal-exportar-pdf').style.display = 'none';
-    }
+    function renderTabela() {
+      const tbody = document.getElementById('tabelaBody');
+      const inicio = (paginaAtual - 1) * itensPorPagina;
+      const paginaItens = listaFiltrada.slice(inicio, inicio + itensPorPagina);
 
-    async function processarPDFSelecionado() {
-      const { jsPDF } = window.jspdf;
-      const checkboxes = document.querySelectorAll('.chk-pdf-item');
-      const blocos = document.querySelectorAll('.pdf-block');
-      
-      fecharModalPDF();
-
-      const blocosParaExportar = [];
-      checkboxes.forEach((chk, index) => {
-        if (chk.checked) blocosParaExportar.push(blocos[index]);
-      });
-
-      if (blocosParaExportar.length === 0) {
-        alert("Selecione ao menos um bloco para exportar.");
+      if (listaFiltrada.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Nenhum registro encontrado.</td></tr>`;
+        document.getElementById('pageInfo').textContent = 'Página 0 de 0';
+        document.getElementById('btnPrev').disabled = true;
+        document.getElementById('btnNext').disabled = true;
         return;
       }
 
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfLargura = pdf.internal.pageSize.getWidth();
-      const pdfAltura = pdf.internal.pageSize.getHeight();
-      
-      const margemX = 10;
-      const larguraUtil = pdfLargura - (margemX * 2);
-      const margemTopo = 12;
-      const margemRodape = 15;
-      const espacamento = 6;
-      const colWidth = (larguraUtil - espacamento) / 2;
+      tbody.innerHTML = paginaItens.map(p => {
+        const sitLower = p.situacao.toLowerCase();
+        let badgeClass = 'badge-outro';
+        if (sitLower.includes('alta')) badgeClass = 'badge-alta';
+        if (sitLower.includes('obito') || sitLower.includes('óbito')) badgeClass = 'badge-obito';
 
-      let posY = margemTopo;
-      let col = 0;
-      let rowMaxHeight = 0;
+        return `
+          <tr>
+            <td><strong>${p.local}</strong></td>
+            <td>${p.prontuario}</td>
+            <td>${p.nome}</td>
+            <td>${p.dieta}</td>
+            <td><span class="badge ${badgeClass}">${p.situacao}</span></td>
+            <td>${p.orientacoes || '<span style="color:#cbd5e1;">-</span>'}</td>
+          </tr>
+        `;
+      }).join('');
 
-      try {
-        for (let i = 0; i < blocosParaExportar.length; i++) {
-          const bloco = blocosParaExportar[i];
-          const canvas = await html2canvas(bloco, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-          const imgData = canvas.toDataURL('image/png');
-          const isCompact = bloco.classList.contains('chart-card');
-
-          if (isCompact) {
-            let targetWidth = colWidth;
-            let targetHeight = (canvas.height * targetWidth) / canvas.width;
-
-            if (col === 0) {
-              if (posY + targetHeight > (pdfAltura - margemRodape) && posY > margemTopo) {
-                pdf.addPage();
-                posY = margemTopo;
-              }
-              pdf.addImage(imgData, 'PNG', margemX, posY, targetWidth, targetHeight);
-              rowMaxHeight = targetHeight;
-              col = 1;
-            } else {
-              let posX = margemX + colWidth + espacamento;
-              if (posY + targetHeight > (pdfAltura - margemRodape)) {
-                pdf.addPage();
-                posY = margemTopo;
-                posX = margemX;
-                pdf.addImage(imgData, 'PNG', posX, posY, targetWidth, targetHeight);
-                rowMaxHeight = targetHeight;
-                col = 1;
-              } else {
-                pdf.addImage(imgData, 'PNG', posX, posY, targetWidth, targetHeight);
-                rowMaxHeight = Math.max(rowMaxHeight, targetHeight);
-                posY += rowMaxHeight + espacamento;
-                col = 0;
-                rowMaxHeight = 0;
-              }
-            }
-          } else {
-            if (col === 1) {
-              posY += rowMaxHeight + espacamento;
-              col = 0;
-              rowMaxHeight = 0;
-            }
-            let targetWidth = larguraUtil;
-            let targetHeight = (canvas.height * larguraUtil) / canvas.width;
-
-            if (posY + targetHeight > (pdfAltura - margemRodape) && posY > margemTopo) {
-              pdf.addPage();
-              posY = margemTopo;
-            }
-
-            pdf.addImage(imgData, 'PNG', margemX, posY, targetWidth, targetHeight);
-            posY += targetHeight + espacamento;
-          }
-        }
-
-        const totalPaginas = pdf.internal.getNumberOfPages();
-        for (let i = 1; i <= totalPaginas; i++) {
-          pdf.setPage(i);
-          pdf.setFontSize(8);
-          pdf.setTextColor(140, 140, 140);
-          pdf.text('Dashboard Desenvolvido por Fgo Marvin Azevedo', pdfLargura / 2, pdfAltura - 6, { align: 'center' });
-        }
-
-        const dataHoje = new Date().toISOString().split('T')[0];
-        pdf.save(`Relatorio_Altas_${dataHoje}.pdf`);
-      } catch (erro) {
-        alert("Erro ao gerar o PDF: " + erro);
-      }
+      const totalPaginas = Math.ceil(listaFiltrada.length / itensPorPagina);
+      document.getElementById('pageInfo').textContent = `Página ${paginaAtual} de ${totalPaginas} (${listaFiltrada.length} registros)`;
+      document.getElementById('btnPrev').disabled = paginaAtual === 1;
+      document.getElementById('btnNext').disabled = paginaAtual >= totalPaginas;
     }
 
-    Papa.parse(NOME_ARQUIVO_CSV, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      encoding: "UTF-8",
-      transformHeader: function(header) {
-        return header.replace(/^\uFEFF/, '').trim();
-      },
-      complete: function(results) {
-        if (results.data && results.data.length > 0) {
-          dadosBrutosCSV = results.data;
-          preencherOpcoesDeFiltro(dadosBrutosCSV);
-          configurarLimitesDatas(dadosBrutosCSV);
-          processarDadosCSV(dadosBrutosCSV);
-        }
-      },
-      error: function() {
-        console.warn("Não foi possível carregar o arquivo automático ALTAS.csv. Utilize o campo de seleção de arquivo manual.");
-      }
+    function mudarPagina(delta) {
+      paginaAtual += delta;
+      renderTabela();
+    }
+
+    document.getElementById('searchInput').addEventListener('input', e => {
+      const termo = e.target.value.toLowerCase();
+      listaFiltrada = listaPacientes.filter(p => 
+        p.nome.toLowerCase().includes(termo) ||
+        p.local.toLowerCase().includes(termo) ||
+        p.dieta.toLowerCase().includes(termo) ||
+        p.situacao.toLowerCase().includes(termo) ||
+        p.orientacoes.toLowerCase().includes(termo) ||
+        p.prontuario.toLowerCase().includes(termo)
+      );
+      paginaAtual = 1;
+      renderTabela();
     });
   </script>
 </body>
