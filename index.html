@@ -40,7 +40,7 @@
     .panel-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
 
     /* Container do Gráfico de Rosca */
-    .chart-container-large { position: relative; height: 340px; width: 100%; display: flex; justify-content: center; align-items: center; }
+    .chart-container-large { position: relative; height: 350px; width: 100%; display: flex; justify-content: center; align-items: center; }
 
     /* Tabela e Busca */
     .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
@@ -161,20 +161,19 @@
     let paginaAtual = 1;
     const itensPorPagina = 50;
 
-    // Paleta de cores oficial baseada nas tags do formulário
+    // CORES MÃE (Sólidas e Vibrantes para Gráfico de Rosca)
     const mapaCoresDesfecho = {
-      'Alta hospitalar': '#c2f0c2',            // Verde Claro
-      'Alta fonoaudiológica': '#c7e8ff',       // Azul Claro
-      'Óbito': '#3a3a3a',                      // Grafite / Escuro
-      'Transf externa': '#ffd5b8',             // Pêssego / Laranja Claro
-      'Transf NEUROFONO': '#245e71',           // Azul Petróleo
-      'Alta para enfermaria (EMA)': '#fceea7',  // Amarelo Claro
-      'Transf CTI': '#5d2e8c',                 // Roxo
-      'Encerrada por piora clínica': '#0e754d',// Verde Escuro
-      'Outros': '#cbd5e1'                      // Cinza Claro
+      'Alta hospitalar': '#22c55e',            // Verde Vibrante
+      'Alta fonoaudiológica': '#3b82f6',       // Azul Padrão
+      'Óbito': '#334155',                      // Grafite/Escuro
+      'Transf externa': '#f97316',             // Laranja Sólido
+      'Transf NEUROFONO': '#0284c7',           // Azul Petróleo / Oceano
+      'Alta para enfermaria (EMA)': '#eab308',  // Amarelo Ouro / Cru
+      'Transf CTI': '#8b5cf6',                 // Roxo Vivo
+      'Encerrada por piora clínica': '#15803d',// Verde Escuro Fechado
+      'Outros': '#94a3b8'                      // Cinza Neutro
     };
 
-    // Mapeamento e normalização das situações para os 8 desfechos oficiais
     function normalizarDesfecho(texto) {
       if (!texto) return 'Outros';
       const s = texto.toLowerCase();
@@ -191,7 +190,6 @@
       return 'Outros';
     }
 
-    // Anonimização
     function anonimizarNome(nome) {
       if (!nome) return 'Paciente Anônimo';
       return nome.split(' ').map(parte => {
@@ -261,7 +259,6 @@
         contagemLocal[p.local] = (contagemLocal[p.local] || 0) + 1;
       });
 
-      // Ordena desfechos pelo volume
       const situacoesOrdenadas = Object.entries(contagemSituacao)
         .sort((a, b) => b[1] - a[1]);
 
@@ -277,7 +274,7 @@
       document.getElementById('pctObitos').textContent = total ? `${((obitos/total)*100).toFixed(1)}% do total` : '0%';
       document.getElementById('kpiOrientacoes').textContent = comOrientacao.toLocaleString('pt-BR');
 
-      // Gráfico de Rosca com as fatias e cores exatas
+      // Gráfico de Rosca com Cores Vivas e Marcantes
       new Chart(document.getElementById('chartSituacao'), {
         type: 'doughnut',
         data: {
@@ -285,9 +282,9 @@
           datasets: [{
             data: valoresGrafico,
             backgroundColor: coresGrafico,
-            borderWidth: 1.5,
+            borderWidth: 2,
             borderColor: '#ffffff',
-            hoverOffset: 5
+            hoverOffset: 6
           }]
         },
         options: {
@@ -297,9 +294,9 @@
             legend: {
               position: 'bottom',
               labels: { 
-                font: { size: 11 }, 
+                font: { size: 11, weight: '500' }, 
                 padding: 12,
-                boxWidth: 15
+                boxWidth: 14
               }
             }
           }
