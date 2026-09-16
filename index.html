@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard de Altas 2026</title>
+  <title>Indicadores de Altas Disfagia Adulto 2026</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -22,25 +22,34 @@
     body { background-color: var(--bg); color: var(--text); padding: 2rem 1rem; max-width: 1300px; margin: 0 auto; }
 
     header { text-align: center; margin-bottom: 2rem; }
-    h1 { font-size: 1.8rem; color: var(--text); }
+    h1 { font-size: 1.9rem; color: var(--text); }
     .subtitle { color: var(--muted); font-size: 0.95rem; margin-top: 0.25rem; }
 
+    /* KPIs */
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
     .kpi-card { background: var(--card-bg); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .kpi-title { font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; }
     .kpi-value { font-size: 2rem; font-weight: 700; }
     .kpi-sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
 
-    .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    /* Layout de Gráficos */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    @media (max-width: 850px) { .charts-grid { grid-template-columns: 1fr; } }
+
     .panel { background: var(--card-bg); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .panel-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
 
+    /* Container do Gráfico de Rosca */
+    .chart-container-large { position: relative; height: 320px; width: 100%; display: flex; justify-content: center; align-items: center; }
+
+    /* Tabela e Busca */
     .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
     .search-input { width: 100%; max-width: 350px; padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 0.9rem; }
+    .search-input:focus { border-color: var(--primary); }
 
     .table-container { overflow-x: auto; max-height: 450px; overflow-y: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left; }
-    th { background: #f1f5f9; color: var(--muted); padding: 0.75rem 1rem; position: sticky; top: 0; font-weight: 600; border-bottom: 2px solid var(--border); }
+    th { background: #f1f5f9; color: var(--muted); padding: 0.75rem 1rem; position: sticky; top: 0; font-weight: 600; border-bottom: 2px solid var(--border); z-index: 2; }
     td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
     tr:hover { background-color: #f8fafc; }
 
@@ -49,17 +58,22 @@
     .badge-obito { background: #fee2e2; color: #991b1b; }
     .badge-outro { background: #f1f5f9; color: #475569; }
 
+    /* Paginação */
     .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 0.85rem; color: var(--muted); }
     .pagination-btn { background: var(--bg); border: 1px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 5px; cursor: pointer; }
+    .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    footer { text-align: center; color: var(--muted); font-size: 0.85rem; margin-top: 2rem; }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Indicadores de Altas & Óbitos — 2026</h1>
-    <p class="subtitle">Análise exclusiva da aba de desfechos</p>
+    <h1>Indicadores de Altas Disfagia Adulto 2026</h1>
+    <p class="subtitle">Acompanhamento de desfechos, dietas prescritas e orientações fonoaudiológicas</p>
   </header>
 
+  <!-- KPIs -->
   <section class="kpi-grid">
     <div class="kpi-card">
       <div class="kpi-title">Total de Pacientes</div>
@@ -76,34 +90,38 @@
       <div class="kpi-sub" id="pctObitos">0% do total</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-title">Com Orientação de Alta</div>
+      <div class="kpi-title">Com Orientações de Alta</div>
       <div class="kpi-value" style="color: var(--purple);" id="kpiOrientacoes">0</div>
     </div>
   </section>
 
+  <!-- GRÁFICOS -->
   <section class="charts-grid">
     <div class="panel">
-      <h2 class="panel-title">Proporção de Desfechos</h2>
-      <div style="max-width: 280px; margin: 0 auto;">
+      <h2 class="panel-title">Proporção de Desfechos (Situação)</h2>
+      <div class="chart-container-large">
         <canvas id="chartSituacao"></canvas>
       </div>
     </div>
 
     <div class="panel">
-      <h2 class="panel-title">Distribuição por Dieta</h2>
-      <canvas id="chartDieta"></canvas>
+      <h2 class="panel-title">Distribuição por Dieta na Saída</h2>
+      <div class="chart-container-large">
+        <canvas id="chartDieta"></canvas>
+      </div>
     </div>
 
     <div class="panel" style="grid-column: 1 / -1;">
       <h2 class="panel-title">Top Setores com mais Desfechos</h2>
-      <canvas id="chartLocal"></canvas>
+      <canvas id="chartLocal" style="max-height: 300px;"></canvas>
     </div>
   </section>
 
+  <!-- TABELA DE PACIENTES -->
   <section class="panel">
     <div class="controls">
-      <h2 class="panel-title" style="margin-bottom:0;">Lista de Pacientes</h2>
-      <input type="text" id="searchInput" class="search-input" placeholder="Buscar paciente, prontuário, dieta, local...">
+      <h2 class="panel-title" style="margin-bottom:0;">Lista Completa de Pacientes</h2>
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar por paciente, prontuário, dieta, local...">
     </div>
     <div class="table-container">
       <table>
@@ -114,11 +132,11 @@
             <th>Paciente</th>
             <th>Dieta</th>
             <th>Situação</th>
-            <th>Orientações</th>
+            <th>Orientações de Alta</th>
           </tr>
         </thead>
         <tbody id="tabelaBody">
-          <tr><td colspan="6" style="text-align: center;">Carregando...</td></tr>
+          <tr><td colspan="6" style="text-align: center;">Carregando dados...</td></tr>
         </tbody>
       </table>
     </div>
@@ -131,6 +149,10 @@
       </div>
     </div>
   </section>
+
+  <footer>
+    <p>Dashboard de Disfagia Adulto • Atualizado via GitHub Actions</p>
+  </footer>
 
   <script>
     let listaPacientes = [];
@@ -167,6 +189,10 @@
 
         listaFiltrada = [...listaPacientes];
         montarDashboard();
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('tabelaBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Erro ao carregar os dados.</td></tr>`;
       });
 
     function montarDashboard() {
@@ -186,31 +212,75 @@
         contagemLocal[p.local] = (contagemLocal[p.local] || 0) + 1;
       });
 
-      document.getElementById('kpiTotal').textContent = total;
-      document.getElementById('kpiAltas').textContent = altas;
+      // Atualizar KPIs
+      document.getElementById('kpiTotal').textContent = total.toLocaleString('pt-BR');
+      document.getElementById('kpiAltas').textContent = altas.toLocaleString('pt-BR');
       document.getElementById('pctAltas').textContent = total ? `${((altas/total)*100).toFixed(1)}% do total` : '0%';
-      document.getElementById('kpiObitos').textContent = obitos;
+      document.getElementById('kpiObitos').textContent = obitos.toLocaleString('pt-BR');
       document.getElementById('pctObitos').textContent = total ? `${((obitos/total)*100).toFixed(1)}% do total` : '0%';
-      document.getElementById('kpiOrientacoes').textContent = comOrientacao;
+      document.getElementById('kpiOrientacoes').textContent = comOrientacao.toLocaleString('pt-BR');
 
+      // Gráfico de Rosca (Proporção de Desfechos) - Ampliado
       new Chart(document.getElementById('chartSituacao'), {
         type: 'doughnut',
-        data: { labels: Object.keys(contagemSituacao), datasets: [{ data: Object.values(contagemSituacao), backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'] }] },
-        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        data: {
+          labels: Object.keys(contagemSituacao),
+          datasets: [{
+            data: Object.values(contagemSituacao),
+            backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6'],
+            borderWidth: 2,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { font: { size: 12 }, padding: 15 }
+            }
+          }
+        }
       });
 
+      // Gráfico de Dietas
       const topDietas = Object.entries(contagemDieta).sort((a,b) => b[1] - a[1]).slice(0, 6);
       new Chart(document.getElementById('chartDieta'), {
         type: 'bar',
-        data: { labels: topDietas.map(i => i[0]), datasets: [{ label: 'Pacientes', data: topDietas.map(i => i[1]), backgroundColor: '#8b5cf6' }] },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+        data: {
+          labels: topDietas.map(i => i[0]),
+          datasets: [{
+            label: 'Nº de Pacientes',
+            data: topDietas.map(i => i[1]),
+            backgroundColor: '#8b5cf6',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
       });
 
-      const topLocais = Object.entries(contagemLocal).sort((a,b) => b[1] - a[1]).slice(0, 8);
+      // Gráfico de Locais
+      const topLocais = Object.entries(contagemLocal).sort((a,b) => b[1] - a[1]).slice(0, 10);
       new Chart(document.getElementById('chartLocal'), {
         type: 'bar',
-        data: { labels: topLocais.map(i => i[0]), datasets: [{ label: 'Pacientes', data: topLocais.map(i => i[1]), backgroundColor: '#3b82f6' }] },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+        data: {
+          labels: topLocais.map(i => i[0]),
+          datasets: [{
+            label: 'Pacientes por Setor',
+            data: topLocais.map(i => i[1]),
+            backgroundColor: '#3b82f6',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } }
+        }
       });
 
       renderTabela();
@@ -222,7 +292,10 @@
       const paginaItens = listaFiltrada.slice(inicio, inicio + itensPorPagina);
 
       if (listaFiltrada.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Nenhum paciente encontrado.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Nenhum registro encontrado.</td></tr>`;
+        document.getElementById('pageInfo').textContent = 'Página 0 de 0';
+        document.getElementById('btnPrev').disabled = true;
+        document.getElementById('btnNext').disabled = true;
         return;
       }
 
@@ -239,13 +312,13 @@
             <td>${p.nome}</td>
             <td>${p.dieta}</td>
             <td><span class="badge ${badgeClass}">${p.situacao}</span></td>
-            <td>${p.orientacoes || '-'}</td>
+            <td>${p.orientacoes || '<span style="color:#cbd5e1;">-</span>'}</td>
           </tr>
         `;
       }).join('');
 
       const totalPaginas = Math.ceil(listaFiltrada.length / itensPorPagina);
-      document.getElementById('pageInfo').textContent = `Página ${paginaAtual} de ${totalPaginas || 1} (${listaFiltrada.length} registros)`;
+      document.getElementById('pageInfo').textContent = `Página ${paginaAtual} de ${totalPaginas} (${listaFiltrada.length} registros)`;
       document.getElementById('btnPrev').disabled = paginaAtual === 1;
       document.getElementById('btnNext').disabled = paginaAtual >= totalPaginas;
     }
@@ -262,6 +335,7 @@
         p.local.toLowerCase().includes(termo) ||
         p.dieta.toLowerCase().includes(termo) ||
         p.situacao.toLowerCase().includes(termo) ||
+        p.orientacoes.toLowerCase().includes(termo) ||
         p.prontuario.toLowerCase().includes(termo)
       );
       paginaAtual = 1;
