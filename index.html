@@ -99,7 +99,7 @@
   <!-- GRÁFICOS -->
   <section class="charts-grid">
     <div class="panel">
-      <h2 class="panel-title">Proporção de Desfechos (Situação)</h2>
+      <h2 class="panel-title">Proporção dos Principais Desfechos</h2>
       <div class="chart-container-large">
         <canvas id="chartSituacao"></canvas>
       </div>
@@ -165,7 +165,7 @@
     function anonimizarNome(nome) {
       if (!nome) return 'Paciente Anônimo';
       return nome.split(' ').map(parte => {
-        if (parte.length <= 2) return parte; // mantém preposições (de, da, do, etc.)
+        if (parte.length <= 2) return parte;
         return parte[0] + '***';
       }).join(' ');
     }
@@ -194,12 +194,20 @@
           const nomeBruto = String(row[idxNome] || '').trim();
           if (!nomeBruto) return null;
 
+          let situacaoOriginal = String(row[idxSituacao] || 'Outros').trim();
+          let situacaoLower = situacaoOriginal.toLowerCase();
+
+          // UNIFICAÇÃO: Padroniza "Transferência externa" e "outro hospital"
+          if (situacaoLower.includes('externa') || situacaoLower.includes('outro hospital')) {
+            situacaoOriginal = 'Transferência Externa';
+          }
+
           return {
             local: String(row[idxLocal] || 'Não informado').trim(),
             prontuario: anonimizarProntuario(row[idxPront]),
             nome: anonimizarNome(nomeBruto),
             dieta: String(row[idxDieta] || 'Sem informação').trim(),
-            situacao: String(row[idxSituacao] || 'Outros').trim(),
+            situacao: situacaoOriginal,
             orientacoes: String(row[idxOrient] || '').trim()
           };
         }).filter(p => p !== null);
@@ -229,20 +237,23 @@
         contagemLocal[p.local] = (contagemLocal[p.local] || 0) + 1;
       });
 
-      // Agrupamento de Desfechos < 5 no Gráfico de Rosca
+      // REGRA TOP 4 + OUTROS
+      const situacoesOrdenadas = Object.entries(contagemSituacaoBruta)
+        .sort((a, b) => b[1] - a[1]);
+
       const contagemSituacao = {};
       let totalOutros = 0;
 
-      Object.entries(contagemSituacaoBruta).forEach(([chave, qtd]) => {
-        if (qtd < 5) {
-          totalOutros += qtd;
-        } else {
+      situacoesOrdenadas.forEach(([chave, qtd], index) => {
+        if (index < 4) {
           contagemSituacao[chave] = qtd;
+        } else {
+          totalOutros += qtd;
         }
       });
 
       if (totalOutros > 0) {
-        contagemSituacao['Outros (<5)'] = (contagemSituacao['Outros (<5)'] || 0) + totalOutros;
+        contagemSituacao['Outros Desfechos'] = totalOutros;
       }
 
       // Atualizar KPIs
@@ -253,14 +264,14 @@
       document.getElementById('pctObitos').textContent = total ? `${((obitos/total)*100).toFixed(1)}% do total` : '0%';
       document.getElementById('kpiOrientacoes').textContent = comOrientacao.toLocaleString('pt-BR');
 
-      // Gráfico de Rosca (Filtrado para desfechos >= 5)
+      // Gráfico de Rosca Limpo e Legível
       new Chart(document.getElementById('chartSituacao'), {
         type: 'doughnut',
         data: {
           labels: Object.keys(contagemSituacao),
           datasets: [{
             data: Object.values(contagemSituacao),
-            backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#64748b'],
+            backgroundColor: ['#10b981', '#ef4444', '#3b82f6', '#f59e0b', '#94a3b8'],
             borderWidth: 2,
             hoverOffset: 6
           }]
