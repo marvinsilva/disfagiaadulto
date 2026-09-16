@@ -3,336 +3,314 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard de Gestão de Pacientes</title>
-  <!-- Chart.js para geração dos gráficos -->
+  <title>Dashboard de Altas e Óbitos 2026</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg: #f1f5f9;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
       --text: #0f172a;
-      --text-muted: #64748b;
+      --muted: #64748b;
       --border: #e2e8f0;
-      --primary: #2563eb;
+      --primary: #3b82f6;
       --success: #10b981;
       --danger: #ef4444;
       --warning: #f59e0b;
+      --purple: #8b5cf6;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 2rem 1rem; max-width: 1300px; margin: 0 auto; }
 
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      padding: 2rem 1rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+    header { text-align: center; margin-bottom: 2rem; }
+    h1 { font-size: 1.8rem; color: var(--text); }
+    .subtitle { color: var(--muted); font-size: 0.95rem; margin-top: 0.25rem; }
 
-    header {
-      margin-bottom: 2rem;
-      text-align: center;
-    }
+    /* KPIs */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .kpi-card { background: var(--card-bg); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .kpi-title { font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .kpi-value { font-size: 2rem; font-weight: 700; }
+    .kpi-sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
 
-    h1 {
-      font-size: 1.8rem;
-      color: var(--text);
-      margin-bottom: 0.25rem;
-    }
+    /* Gráficos */
+    .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .panel { background: var(--card-bg); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .panel-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
 
-    .subtitle {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
+    /* Tabela */
+    .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
+    .search-input { width: 100%; max-width: 350px; padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 0.9rem; }
+    .search-input:focus { border-color: var(--primary); }
 
-    /* Grid dos Cartões de Indicadores (KPIs) */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
+    .table-container { overflow-x: auto; max-height: 450px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left; }
+    th { background: #f1f5f9; color: var(--muted); padding: 0.75rem 1rem; position: sticky; top: 0; font-weight: 600; border-bottom: 2px solid var(--border); }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+    tr:hover { background-color: #f8fafc; }
 
-    .kpi-card {
-      background: var(--card-bg);
-      border-radius: 10px;
-      padding: 1.25rem;
-      border: 1px solid var(--border);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
+    .badge { padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+    .badge-alta { background: #d1fae5; color: #065f46; }
+    .badge-obito { background: #fee2e2; color: #991b1b; }
+    .badge-outro { background: #f1f5f9; color: #475569; }
 
-    .kpi-title {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-    }
-
-    .kpi-value {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .kpi-card.success .kpi-value { color: var(--success); }
-    .kpi-card.danger .kpi-value { color: var(--danger); }
-    .kpi-card.primary .kpi-value { color: var(--primary); }
-
-    /* Layout dos Gráficos e Tabelas */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .panel {
-      background: var(--card-bg);
-      border-radius: 10px;
-      padding: 1.5rem;
-      border: 1px solid var(--border);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
-    .panel-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--text);
-    }
-
-    /* Tabela de Resumo */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-
-    th, td {
-      padding: 0.75rem 0.5rem;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-
-    th {
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.6rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: var(--bg);
-    }
-
-    .badge.success { background: #d1fae5; color: #065f46; }
-    .badge.danger { background: #fee2e2; color: #991b1b; }
-
-    footer {
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 2rem;
-    }
+    footer { text-align: center; color: var(--muted); font-size: 0.85rem; margin-top: 2rem; }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Dashboard do Setor de Fonoaudiologia</h1>
-    <p class="subtitle">Acompanhamento diário em tempo real dos setores e desfechos</p>
+    <h1>Indicadores de Altas & Óbitos — 2026</h1>
+    <p class="subtitle" id="nomeAbaDetectada">Análise consolidada de desfechos e prescrições de dieta</p>
   </header>
 
-  <!-- Indicadores Principais (KPIs) -->
+  <!-- KPIs -->
   <section class="kpi-grid">
-    <div class="kpi-card primary">
-      <div class="kpi-title">Pacientes em Acompanhamento</div>
-      <div class="kpi-value" id="totalAtivos">0</div>
+    <div class="kpi-card">
+      <div class="kpi-title">Total de Pacientes</div>
+      <div class="kpi-value" id="kpiTotal">0</div>
+      <div class="kpi-sub">Registros analisados</div>
     </div>
-    <div class="kpi-card success">
-      <div class="kpi-title">Total de Altas</div>
-      <div class="kpi-value" id="totalAltas">0</div>
+    <div class="kpi-card">
+      <div class="kpi-title">Altas</div>
+      <div class="kpi-value" style="color: var(--success);" id="kpiAltas">0</div>
+      <div class="kpi-sub" id="pctAltas">0% do total</div>
     </div>
-    <div class="kpi-card danger">
-      <div class="kpi-title">Total de Óbitos</div>
-      <div class="kpi-value" id="totalObitos">0</div>
+    <div class="kpi-card">
+      <div class="kpi-title">Óbitos</div>
+      <div class="kpi-value" style="color: var(--danger);" id="kpiObitos">0</div>
+      <div class="kpi-sub" id="pctObitos">0% do total</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Orientações de Alta</div>
+      <div class="kpi-value" style="color: var(--purple);" id="kpiOrientacoes">0</div>
+      <div class="kpi-sub">Com orientações registradas</div>
     </div>
   </section>
 
-  <!-- Painéis Principais -->
-  <section class="dashboard-grid">
-    <!-- Gráfico de Pacientes por Área -->
+  <!-- GRÁFICOS -->
+  <section class="charts-grid">
     <div class="panel">
-      <h2 class="panel-title">Distribuição de Pacientes por Setor/Aba</h2>
-      <canvas id="chartSetores"></canvas>
+      <h2 class="panel-title">Proporção de Desfechos (Situação)</h2>
+      <div style="max-width: 320px; margin: 0 auto;">
+        <canvas id="chartSituacao"></canvas>
+      </div>
     </div>
 
-    <!-- Tabela Detalhada por Área -->
     <div class="panel">
-      <h2 class="panel-title">Detalhamento por Setor</h2>
+      <h2 class="panel-title">Distribuição por Dieta na Alta/Óbito</h2>
+      <canvas id="chartDieta"></canvas>
+    </div>
+
+    <div class="panel" style="grid-column: 1 / -1;">
+      <h2 class="panel-title">Desfechos por Local / Unidade</h2>
+      <canvas id="chartLocal"></canvas>
+    </div>
+  </section>
+
+  <!-- TABELA DE PACIENTES -->
+  <section class="panel">
+    <div class="controls">
+      <h2 class="panel-title" style="margin-bottom:0;">Lista Completa de Pacientes</h2>
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar por paciente, local, dieta, situação...">
+    </div>
+    <div class="table-container">
       <table>
         <thead>
           <tr>
-            <th>Setor / Profissional</th>
-            <th>Pacientes</th>
-            <th>% do Total</th>
+            <th>Local</th>
+            <th>Prontuário</th>
+            <th>Paciente</th>
+            <th>Dieta</th>
+            <th>Situação</th>
+            <th>Orientações de Alta</th>
           </tr>
         </thead>
-        <tbody id="tabelaSetores">
-          <!-- Inserido dinamicamente via JS -->
+        <tbody id="tabelaBody">
+          <tr><td colspan="6" style="text-align: center;">Carregando dados...</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  <!-- Painel de Desfechos (Altas e Óbitos) -->
-  <section class="panel">
-    <h2 class="panel-title">Análise de Desfechos (Altas vs. Óbitos)</h2>
-    <div style="max-width: 400px; margin: 0 auto;">
-      <canvas id="chartDesfechos"></canvas>
-    </div>
-  </section>
-
   <footer>
-    <p>Painel atualizado automaticamente via GitHub Actions</p>
+    <p>Dashboard atualizado automaticamente via GitHub Actions</p>
   </footer>
 
   <script>
-    // Áreas de acompanhamento ativo (ignora a primeira aba e abas de desfecho)
-    const setoresAlvo = [
-      "emergencia", "cti", "danielle", "emille", 
-      "fabiane", "fabiola", "luisa", "neurofono", "sem referencia"
-    ];
+    let listaPacientes = [];
 
     fetch('dados.json')
       .then(res => res.json())
-      .then(dados => {
-        processarDados(dados);
-      })
-      .catch(err => console.error("Erro ao carregar os dados:", err));
+      .then(dados => processarDados(dados))
+      .catch(err => {
+        console.error(err);
+        document.getElementById('tabelaBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Erro ao carregar dados.json</td></tr>`;
+      });
 
     function processarDados(dados) {
-      let contagemSetores = {};
-      let totalAtivos = 0;
-      let totalAltas = 0;
-      let totalObitos = 0;
+      // Busca a aba que contém 'alta' ou '2026'
+      const chaveAba = Object.keys(dados).find(k => {
+        const lower = k.toLowerCase();
+        return lower.includes('2026') || lower.includes('alta') || lower.includes('obito') || lower.includes('óbito');
+      }) || Object.keys(dados)[0];
 
-      // Normalizar nomes das abas da planilha para letras minúsculas
-      const abasExistentes = {};
-      Object.keys(dados).forEach(key => {
-        abasExistentes[key.toLowerCase().trim()] = dados[key];
-      });
+      document.getElementById('nomeAbaDetectada').textContent = `Dados extraídos da aba: "${chaveAba}"`;
 
-      // 1. Processar Pacientes Ativos por Setor
-      setoresAlvo.forEach(setor => {
-        const dadosAba = abasExistentes[setor];
-        // Desconsidera o cabeçalho (linha 0) para contar apenas pacientes
-        const qtdPacientes = (dadosAba && dadosAba.length > 1) ? dadosAba.length - 1 : 0;
+      const matriz = dados[chaveAba];
+      if (!matriz || matriz.length <= 1) return;
+
+      // Localizar o índice exato de cada coluna pelo nome
+      const cabecalhos = matriz[0].map(c => String(c).trim().toLowerCase());
+      const idxLocal = cabecalhos.findIndex(c => c.includes('local'));
+      const idxPront = cabecalhos.findIndex(c => c.includes('prontu'));
+      const idxNome = cabecalhos.findIndex(c => c.includes('nome') || c.includes('paciente'));
+      const idxDieta = cabecalhos.findIndex(c => c.includes('dieta'));
+      const idxSituacao = cabecalhos.findIndex(c => c.includes('situa') || c.includes('desfecho'));
+      const idxOrient = cabecalhos.findIndex(c => c.includes('orienta'));
+
+      // Processar linhas
+      const linhas = matriz.slice(1);
+      listaPacientes = linhas.map(row => ({
+        local: String(row[idxLocal] || 'Não informado').trim(),
+        prontuario: String(row[idxPront] || '-').trim(),
+        nome: String(row[idxNome] || 'Paciente sem nome').trim(),
+        dieta: String(row[idxDieta] || 'Sem informação').trim(),
+        situacao: String(row[idxSituacao] || 'Outros').trim(),
+        orientacoes: String(row[idxOrient] || '').trim()
+      })).filter(p => p.nome !== '' && p.nome !== 'Paciente sem nome');
+
+      montarDashboard();
+    }
+
+    function montarDashboard() {
+      const total = listaPacientes.length;
+      let altas = 0, obitos = 0, comOrientacao = 0;
+      const contagemDieta = {}, contagemLocal = {}, contagemSituacao = {};
+
+      listaPacientes.forEach(p => {
+        const sitLower = p.situacao.toLowerCase();
         
-        contagemSetores[setor] = qtdPacientes;
-        totalAtivos += qtdPacientes;
+        if (sitLower.includes('alta')) altas++;
+        else if (sitLower.includes('obito') || sitLower.includes('óbito')) obitos++;
+
+        if (p.orientacoes && p.orientacoes.length > 2) comOrientacao++;
+
+        // Contagens para os gráficos
+        const sitChave = p.situacao || 'Não especificado';
+        contagemSituacao[sitChave] = (contagemSituacao[sitChave] || 0) + 1;
+
+        const dietaChave = p.dieta || 'Sem informação';
+        contagemDieta[dietaChave] = (contagemDieta[dietaChave] || 0) + 1;
+
+        const localChave = p.local || 'Outros';
+        contagemLocal[localChave] = (contagemLocal[localChave] || 0) + 1;
       });
 
-      // 2. Processar Altas e Óbitos
-      Object.keys(abasExistentes).forEach(nomeAba => {
-        if (nomeAba.includes('alta')) {
-          const dadosAlta = abasExistentes[nomeAba];
-          totalAltas += (dadosAlta && dadosAlta.length > 1) ? dadosAlta.length - 1 : 0;
-        }
-        if (nomeAba.includes('obito') || nomeAba.includes('óbito')) {
-          const dadosObito = abasExistentes[nomeAba];
-          totalObitos += (dadosObito && dadosObito.length > 1) ? dadosObito.length - 1 : 0;
-        }
-      });
+      // Atualizar KPIs
+      document.getElementById('kpiTotal').textContent = total;
+      document.getElementById('kpiAltas').textContent = altas;
+      document.getElementById('pctAltas').textContent = total ? `${((altas/total)*100).toFixed(1)}% do total` : '0%';
+      document.getElementById('kpiObitos').textContent = obitos;
+      document.getElementById('pctObitos').textContent = total ? `${((obitos/total)*100).toFixed(1)}% do total` : '0%';
+      document.getElementById('kpiOrientacoes').textContent = comOrientacao;
 
-      // 3. Atualizar Indicadores (Cards)
-      document.getElementById('totalAtivos').textContent = totalAtivos;
-      document.getElementById('totalAltas').textContent = totalAltas;
-      document.getElementById('totalObitos').textContent = totalObitos;
+      // Renderizar Gráficos
+      renderGraficoSituacao(contagemSituacao);
+      renderGraficoDieta(contagemDieta);
+      renderGraficoLocal(contagemLocal);
 
-      // 4. Renderizar Tabela por Setor
-      renderizarTabelaSetores(contagemSetores, totalAtivos);
-
-      // 5. Renderizar Gráficos
-      renderizarGraficoSetores(contagemSetores);
-      renderizarGraficoDesfechos(totalAltas, totalObitos);
+      // Renderizar Tabela
+      renderTabela(listaPacientes);
     }
 
-    function renderizarTabelaSetores(contagem, total) {
-      const tbody = document.getElementById('tabelaSetores');
-      tbody.innerHTML = '';
-
-      Object.keys(contagem).forEach(setor => {
-        const qtd = contagem[setor];
-        const pct = total > 0 ? ((qtd / total) * 100).toFixed(1) : 0;
-
-        const row = `
-          <tr>
-            <td style="text-transform: capitalize; font-weight: 500;">${setor}</td>
-            <td><strong>${qtd}</strong></td>
-            <td><span class="badge">${pct}%</span></td>
-          </tr>
-        `;
-        tbody.innerHTML += row;
-      });
-    }
-
-    function renderizarGraficoSetores(contagem) {
-      const ctx = document.getElementById('chartSetores').getContext('2d');
-      
-      const labels = Object.keys(contagem).map(s => s.toUpperCase());
-      const valores = Object.values(contagem);
-
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Nº de Pacientes',
-            data: valores,
-            backgroundColor: '#2563eb',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1 } }
-          }
-        }
-      });
-    }
-
-    function renderizarGraficoDesfechos(altas, obitos) {
-      const ctx = document.getElementById('chartDesfechos').getContext('2d');
-
-      new Chart(ctx, {
+    function renderGraficoSituacao(dados) {
+      new Chart(document.getElementById('chartSituacao'), {
         type: 'doughnut',
         data: {
-          labels: ['Altas', 'Óbitos'],
+          labels: Object.keys(dados),
           datasets: [{
-            data: [altas, obitos],
-            backgroundColor: ['#10b981', '#ef4444']
+            data: Object.values(dados),
+            backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6']
           }]
         },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'bottom' }
-          }
-        }
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
       });
     }
+
+    function renderGraficoDieta(dados) {
+      new Chart(document.getElementById('chartDieta'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(dados),
+          datasets: [{
+            label: 'Nº de Pacientes',
+            data: Object.values(dados),
+            backgroundColor: '#8b5cf6',
+            borderRadius: 5
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+    }
+
+    function renderGraficoLocal(dados) {
+      new Chart(document.getElementById('chartLocal'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(dados),
+          datasets: [{
+            label: 'Pacientes por Local',
+            data: Object.values(dados),
+            backgroundColor: '#3b82f6',
+            borderRadius: 5
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+    }
+
+    function renderTabela(lista) {
+      const tbody = document.getElementById('tabelaBody');
+      tbody.innerHTML = '';
+
+      if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Nenhum registro encontrado.</td></tr>`;
+        return;
+      }
+
+      lista.forEach(p => {
+        const sitLower = p.situacao.toLowerCase();
+        let badgeClass = 'badge-outro';
+        if (sitLower.includes('alta')) badgeClass = 'badge-alta';
+        if (sitLower.includes('obito') || sitLower.includes('óbito')) badgeClass = 'badge-obito';
+
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${p.local}</strong></td>
+            <td>${p.prontuario}</td>
+            <td>${p.nome}</td>
+            <td>${p.dieta}</td>
+            <td><span class="badge ${badgeClass}">${p.situacao}</span></td>
+            <td>${p.orientacoes || '<span style="color:#cbd5e1;">-</span>'}</td>
+          </tr>
+        `;
+      });
+    }
+
+    // Filtro de busca na tabela
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const termo = e.target.value.toLowerCase();
+      const filtrados = listaPacientes.filter(p => 
+        p.nome.toLowerCase().includes(termo) ||
+        p.local.toLowerCase().includes(termo) ||
+        p.dieta.toLowerCase().includes(termo) ||
+        p.situacao.toLowerCase().includes(termo) ||
+        p.orientacoes.toLowerCase().includes(termo) ||
+        p.prontuario.toLowerCase().includes(termo)
+      );
+      renderTabela(filtrados);
+    });
   </script>
 </body>
 </html>
