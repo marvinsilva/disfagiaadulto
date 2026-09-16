@@ -174,15 +174,22 @@
       'Outros': '#94a3b8'                      // Cinza Neutro
     };
 
-    // Unificação de Setores Emergenciais para "EMA"
+    // Unificação de Setores (EMA e CTI)
     function normalizarLocal(texto) {
       if (!texto) return 'Não informado';
       let str = String(texto).trim();
       let upper = str.toUpperCase();
 
+      // Regra 1: Prioridade EMA (se tiver EMA/UAD/Emergência, fica como EMA mesmo se tiver CTI)
       if (upper.includes('EMA') || upper.includes('UAD') || upper.includes('EMERGÊNCIA') || upper.includes('EMERGENCIA')) {
         return 'EMA';
       }
+
+      // Regra 2: Unificação de CTI
+      if (upper.includes('CTI')) {
+        return 'CTI';
+      }
+
       return str;
     }
 
@@ -336,7 +343,7 @@
         }
       });
 
-      // Gráfico de Locais (Com EMA Unificado)
+      // Gráfico de Locais (Com EMA e CTI Unificados)
       const topLocais = Object.entries(contagemLocal).sort((a,b) => b[1] - a[1]).slice(0, 10);
       new Chart(document.getElementById('chartLocal'), {
         type: 'bar',
