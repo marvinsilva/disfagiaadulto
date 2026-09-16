@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Dados - Planilha</title>
+  <style>
+    :root {
+      --primary: #1e293b;
+      --accent: #2563eb;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 2rem 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .controls-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    /* Navegação por Abas */
+    .tabs-nav {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+    }
+
+    .tab-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      color: #475569;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    /* Campo de Busca */
+    .search-box {
+      width: 100%;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Tabela de Dados */
+    .table-container {
+      background: var(--card-bg);
+      border-radius: 8px;
+      overflow-x: auto;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: var(--primary);
+      font-weight: 600;
+      padding: 0.85rem 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: #334155;
+    }
+
+    tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .loading, .error, .no-results {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #64748b;
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Painel de Dados da Empresa</h1>
+    <p class="subtitle">Atualizado diariamente a partir do Google Sheets</p>
+  </header>
+
+  <div class="controls-container">
+    <!-- Botões de abas serão gerados via JS -->
+    <div class="tabs-nav" id="tabsNav"></div>
+    
+    <!-- Busca em tempo real -->
+    <div class="search-box">
+      <input type="text" id="searchInput" class="search-input" placeholder="Digite para filtrar os dados...">
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div id="content">
+      <div class="loading">Carregando dados da planilha...</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Site hospedado no GitHub Pages • Atualização automática via GitHub Actions</p>
+  </footer>
+
+  <script>
+    let dadosPlanilha = {};
+    let abaAtual = '';
+
+    // 1. Carregar o arquivo dados.json
+    fetch('dados.json')
+      .then(response => {
+        if (!response.ok) throw new Error('Não foi possível carregar os dados.');
+        return response.json();
+      })
+      .then(dados => {
+        dadosPlanilha = dados;
+        const nomesAbas = Object.keys(dados);
+
+        if (nomesAbas.length === 0) {
+          document.getElementById('content').innerHTML = '<div class="no-results">A planilha está vazia.</div>';
+          return;
+        }
+
+        // Criar os botões de navegação para cada aba
+        renderizarAbas(nomesAbas);
+        
+        // Selecionar a primeira aba por padrão
+        mudarAba(nomesAbas[0]);
+      })
+      .catch(err => {
+        document.getElementById('content').innerHTML = `<div class="error">Erro ao carregar dados: ${err.message}</div>`;
+      });
+
+    // 2. Renderizar botões das abas
+    function renderizarAbas(abas) {
+      const tabsNav = document.getElementById('tabsNav');
+      tabsNav.innerHTML = '';
+
+      abas.forEach(nomeAba => {
+        const btn = document.createElement('button');
+        btn.className = 'tab-btn';
+        btn.textContent = nomeAba;
+        btn.onclick = () => mudarAba(nomeAba);
+        tabsNav.appendChild(btn);
+      });
+    }
+
+    // 3. Mudar de aba ativa
+    function mudarAba(nomeAba) {
+      abaAtual = nomeAba;
+
+      // Atualizar classe do botão ativo
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent === nomeAba);
+      });
+
+      // Limpar busca
+      document.getElementById('searchInput').value = '';
+
+      // Renderizar tabela com a aba selecionada
+      renderizarTabela(dadosPlanilha[nomeAba]);
+    }
+
+    // 4. Desenhar a tabela na tela
+    function renderizarTabela(matrizLinhas) {
+      const content = document.getElementById('content');
+
+      if (!matrizLinhas || matrizLinhas.length === 0) {
+        content.innerHTML = '<div class="no-results">Esta aba não contém dados.</div>';
+        return;
+      }
+
+      // A primeira linha (matrizLinhas[0]) são os cabeçalhos das colunas
+      const cabecalhos = matrizLinhas[0];
+      const linhasDeDados = matrizLinhas.slice(1);
+
+      let html = '<table><thead><tr>';
+      cabecalhos.forEach(col => {
+        html += `<th>${col !== undefined ? col : ''}</th>`;
+      });
+      html += '</tr></thead><tbody id="tableBody">';
+
+      linhasDeDados.forEach(row => {
+        html += '<tr>';
+        row.forEach(cell => {
+          html += `<td>${cell !== undefined ? cell : ''}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      content.innerHTML = html;
+    }
+
+    // 5. Filtro de busca em tempo real
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const termo = e.target.value.toLowerCase();
+      const matrizLinhas = dadosPlanilha[abaAtual];
+
+      if (!matrizLinhas || matrizLinhas.length <= 1) return;
+
+      const cabecalhos = matrizLinhas[0];
+      const linhasDeDados = matrizLinhas.slice(1);
+
+      // Filtrar linhas que contenham o termo buscado
+      const linhasFiltradas = linhasDeDados.filter(row => {
+        return row.some(cell => String(cell).toLowerCase().includes(termo));
+      });
+
+      // Re-renderizar com as linhas filtradas
+      renderizarTabela([cabecalhos, ...linhasFiltradas]);
+    });
+  </script>
+</body>
+</html>
