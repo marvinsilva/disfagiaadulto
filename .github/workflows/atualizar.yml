@@ -17,7 +17,7 @@ jobs:
 
       - name: Baixar JSON da Planilha
         run: |
-          curl -sL "COLE_A_SUA_URL_DO_APPS_SCRIPT_AQUI" -o dados.json
+          curl -sL "https://script.google.com/macros/s/AKfycbxrCbQZsAVjMoPzDz-6vuyLKjlMH7m0E1BlIzdtPmgSUYaoBk75O2G0UdWF_uWPD7nE/exec" -o dados.json
           head -n 5 dados.json
 
       - name: Configurar Git
