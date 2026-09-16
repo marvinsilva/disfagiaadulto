@@ -15,7 +15,6 @@
       --primary: #3b82f6;
       --success: #10b981;
       --danger: #ef4444;
-      --warning: #f59e0b;
       --purple: #8b5cf6;
     }
 
@@ -38,14 +37,14 @@
     .panel { background: var(--card-bg); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .panel-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
 
-    /* Tabela */
+    /* Tabela e Busca */
     .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
     .search-input { width: 100%; max-width: 350px; padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 0.9rem; }
     .search-input:focus { border-color: var(--primary); }
 
     .table-container { overflow-x: auto; max-height: 450px; overflow-y: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left; }
-    th { background: #f1f5f9; color: var(--muted); padding: 0.75rem 1rem; position: sticky; top: 0; font-weight: 600; border-bottom: 2px solid var(--border); }
+    th { background: #f1f5f9; color: var(--muted); padding: 0.75rem 1rem; position: sticky; top: 0; font-weight: 600; border-bottom: 2px solid var(--border); z-index: 2; }
     td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
     tr:hover { background-color: #f8fafc; }
 
@@ -54,6 +53,11 @@
     .badge-obito { background: #fee2e2; color: #991b1b; }
     .badge-outro { background: #f1f5f9; color: #475569; }
 
+    /* Paginação */
+    .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); }
+    .pagination-btn { background: var(--bg); border: 1px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 5px; cursor: pointer; font-weight: 500; }
+    .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
     footer { text-align: center; color: var(--muted); font-size: 0.85rem; margin-top: 2rem; }
   </style>
 </head>
@@ -61,7 +65,7 @@
 
   <header>
     <h1>Indicadores de Altas & Óbitos — 2026</h1>
-    <p class="subtitle" id="nomeAbaDetectada">Análise consolidada de desfechos e prescrições de dieta</p>
+    <p class="subtitle" id="nomeAbaDetectada">Carregando e otimizando dados...</p>
   </header>
 
   <!-- KPIs -->
@@ -84,7 +88,7 @@
     <div class="kpi-card">
       <div class="kpi-title">Orientações de Alta</div>
       <div class="kpi-value" style="color: var(--purple);" id="kpiOrientacoes">0</div>
-      <div class="kpi-sub">Com orientações registradas</div>
+      <div class="kpi-sub">Com registro de orientação</div>
     </div>
   </section>
 
@@ -92,7 +96,7 @@
   <section class="charts-grid">
     <div class="panel">
       <h2 class="panel-title">Proporção de Desfechos (Situação)</h2>
-      <div style="max-width: 320px; margin: 0 auto;">
+      <div style="max-width: 300px; margin: 0 auto;">
         <canvas id="chartSituacao"></canvas>
       </div>
     </div>
@@ -103,7 +107,7 @@
     </div>
 
     <div class="panel" style="grid-column: 1 / -1;">
-      <h2 class="panel-title">Desfechos por Local / Unidade</h2>
+      <h2 class="panel-title">Top Setores / Locais com mais Desfechos</h2>
       <canvas id="chartLocal"></canvas>
     </div>
   </section>
@@ -111,8 +115,8 @@
   <!-- TABELA DE PACIENTES -->
   <section class="panel">
     <div class="controls">
-      <h2 class="panel-title" style="margin-bottom:0;">Lista Completa de Pacientes</h2>
-      <input type="text" id="searchInput" class="search-input" placeholder="Buscar por paciente, local, dieta, situação...">
+      <h2 class="panel-title" style="margin-bottom:0;">Lista de Pacientes</h2>
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar paciente, prontuário, dieta, local...">
     </div>
     <div class="table-container">
       <table>
@@ -127,40 +131,57 @@
           </tr>
         </thead>
         <tbody id="tabelaBody">
-          <tr><td colspan="6" style="text-align: center;">Carregando dados...</td></tr>
+          <tr><td colspan="6" style="text-align: center;">Processando dados da planilha...</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Posição da Paginação -->
+    <div class="pagination">
+      <span id="pageInfo">Página 1</span>
+      <div>
+        <button id="btnPrev" class="pagination-btn" onclick="mudarPagina(-1)">Anterior</button>
+        <button id="btnNext" class="pagination-btn" onclick="mudarPagina(1)">Próxima</button>
+      </div>
     </div>
   </section>
 
   <footer>
-    <p>Dashboard atualizado automaticamente via GitHub Actions</p>
+    <p>Dashboard otimizado • Atualizado automaticamente via GitHub Actions</p>
   </footer>
 
   <script>
     let listaPacientes = [];
+    let listaFiltrada = [];
+    let paginaAtual = 1;
+    const itensPorPagina = 50;
 
-    fetch('dados.json')
-      .then(res => res.json())
-      .then(dados => processarDados(dados))
-      .catch(err => {
-        console.error(err);
-        document.getElementById('tabelaBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Erro ao carregar dados.json</td></tr>`;
-      });
+    let chartInstanceSituacao = null;
+    let chartInstanceDieta = null;
+    let chartInstanceLocal = null;
+
+    // Processamento assíncrono para não travar a interface
+    setTimeout(() => {
+      fetch('dados.json')
+        .then(res => res.json())
+        .then(dados => processarDados(dados))
+        .catch(err => {
+          console.error(err);
+          document.getElementById('tabelaBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Erro ao carregar dados.json</td></tr>`;
+        });
+    }, 100);
 
     function processarDados(dados) {
-      // Busca a aba que contém 'alta' ou '2026'
       const chaveAba = Object.keys(dados).find(k => {
         const lower = k.toLowerCase();
         return lower.includes('2026') || lower.includes('alta') || lower.includes('obito') || lower.includes('óbito');
       }) || Object.keys(dados)[0];
 
-      document.getElementById('nomeAbaDetectada').textContent = `Dados extraídos da aba: "${chaveAba}"`;
+      document.getElementById('nomeAbaDetectada').textContent = `Dados da aba: "${chaveAba}"`;
 
       const matriz = dados[chaveAba];
       if (!matriz || matriz.length <= 1) return;
 
-      // Localizar o índice exato de cada coluna pelo nome
       const cabecalhos = matriz[0].map(c => String(c).trim().toLowerCase());
       const idxLocal = cabecalhos.findIndex(c => c.includes('local'));
       const idxPront = cabecalhos.findIndex(c => c.includes('prontu'));
@@ -169,17 +190,23 @@
       const idxSituacao = cabecalhos.findIndex(c => c.includes('situa') || c.includes('desfecho'));
       const idxOrient = cabecalhos.findIndex(c => c.includes('orienta'));
 
-      // Processar linhas
       const linhas = matriz.slice(1);
-      listaPacientes = linhas.map(row => ({
-        local: String(row[idxLocal] || 'Não informado').trim(),
-        prontuario: String(row[idxPront] || '-').trim(),
-        nome: String(row[idxNome] || 'Paciente sem nome').trim(),
-        dieta: String(row[idxDieta] || 'Sem informação').trim(),
-        situacao: String(row[idxSituacao] || 'Outros').trim(),
-        orientacoes: String(row[idxOrient] || '').trim()
-      })).filter(p => p.nome !== '' && p.nome !== 'Paciente sem nome');
+      
+      listaPacientes = linhas.map(row => {
+        const nome = String(row[idxNome] || '').trim();
+        if (!nome) return null;
 
+        return {
+          local: String(row[idxLocal] || 'Não informado').trim(),
+          prontuario: String(row[idxPront] || '-').trim(),
+          nome: nome,
+          dieta: String(row[idxDieta] || 'Sem informação').trim(),
+          situacao: String(row[idxSituacao] || 'Outros').trim(),
+          orientacoes: String(row[idxOrient] || '').trim()
+        };
+      }).filter(p => p !== null);
+
+      listaFiltrada = [...listaPacientes];
       montarDashboard();
     }
 
@@ -196,7 +223,6 @@
 
         if (p.orientacoes && p.orientacoes.length > 2) comOrientacao++;
 
-        // Contagens para os gráficos
         const sitChave = p.situacao || 'Não especificado';
         contagemSituacao[sitChave] = (contagemSituacao[sitChave] || 0) + 1;
 
@@ -208,24 +234,73 @@
       });
 
       // Atualizar KPIs
-      document.getElementById('kpiTotal').textContent = total;
-      document.getElementById('kpiAltas').textContent = altas;
+      document.getElementById('kpiTotal').textContent = total.toLocaleString('pt-BR');
+      document.getElementById('kpiAltas').textContent = altas.toLocaleString('pt-BR');
       document.getElementById('pctAltas').textContent = total ? `${((altas/total)*100).toFixed(1)}% do total` : '0%';
-      document.getElementById('kpiObitos').textContent = obitos;
+      document.getElementById('kpiObitos').textContent = obitos.toLocaleString('pt-BR');
       document.getElementById('pctObitos').textContent = total ? `${((obitos/total)*100).toFixed(1)}% do total` : '0%';
-      document.getElementById('kpiOrientacoes').textContent = comOrientacao;
+      document.getElementById('kpiOrientacoes').textContent = comOrientacao.toLocaleString('pt-BR');
 
-      // Renderizar Gráficos
+      // Renderizar Gráficos otimizados
       renderGraficoSituacao(contagemSituacao);
       renderGraficoDieta(contagemDieta);
       renderGraficoLocal(contagemLocal);
 
-      // Renderizar Tabela
-      renderTabela(listaPacientes);
+      // Renderizar Tabela Paginada
+      paginaAtual = 1;
+      renderTabelaPaginada();
+    }
+
+    function renderTabelaPaginada() {
+      const tbody = document.getElementById('tabelaBody');
+      const inicio = (paginaAtual - 1) * itensPorPagina;
+      const fim = inicio + itensPorPagina;
+      const paginaItens = listaFiltrada.slice(inicio, fim);
+
+      if (listaFiltrada.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Nenhum paciente encontrado.</td></tr>`;
+        document.getElementById('pageInfo').textContent = 'Página 0 de 0';
+        document.getElementById('btnPrev').disabled = true;
+        document.getElementById('btnNext').disabled = true;
+        return;
+      }
+
+      // Montagem performática do HTML em memória usando Array.map e .join()
+      const htmlArray = paginaItens.map(p => {
+        const sitLower = p.situacao.toLowerCase();
+        let badgeClass = 'badge-outro';
+        if (sitLower.includes('alta')) badgeClass = 'badge-alta';
+        if (sitLower.includes('obito') || sitLower.includes('óbito')) badgeClass = 'badge-obito';
+
+        return `
+          <tr>
+            <td><strong>${p.local}</strong></td>
+            <td>${p.prontuario}</td>
+            <td>${p.nome}</td>
+            <td>${p.dieta}</td>
+            <td><span class="badge ${badgeClass}">${p.situacao}</span></td>
+            <td>${p.orientacoes || '<span style="color:#cbd5e1;">-</span>'}</td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = htmlArray.join('');
+
+      // Paginação
+      const totalPaginas = Math.ceil(listaFiltrada.length / itensPorPagina);
+      document.getElementById('pageInfo').textContent = `Página ${paginaAtual} de ${totalPaginas} (${listaFiltrada.length} registros)`;
+      document.getElementById('btnPrev').disabled = paginaAtual === 1;
+      document.getElementById('btnNext').disabled = paginaAtual >= totalPaginas;
+    }
+
+    function mudarPagina(delta) {
+      paginaAtual += delta;
+      renderTabelaPaginada();
     }
 
     function renderGraficoSituacao(dados) {
-      new Chart(document.getElementById('chartSituacao'), {
+      if (chartInstanceSituacao) chartInstanceSituacao.destroy();
+      chartInstanceSituacao = new Chart(document.getElementById('chartSituacao'), {
         type: 'doughnut',
         data: {
           labels: Object.keys(dados),
@@ -239,13 +314,18 @@
     }
 
     function renderGraficoDieta(dados) {
-      new Chart(document.getElementById('chartDieta'), {
+      if (chartInstanceDieta) chartInstanceDieta.destroy();
+      
+      // Ordena e pega os top 7 tipos de dieta
+      const ordenado = Object.entries(dados).sort((a,b) => b[1] - a[1]).slice(0, 7);
+      
+      chartInstanceDieta = new Chart(document.getElementById('chartDieta'), {
         type: 'bar',
         data: {
-          labels: Object.keys(dados),
+          labels: ordenado.map(i => i[0]),
           datasets: [{
             label: 'Nº de Pacientes',
-            data: Object.values(dados),
+            data: ordenado.map(i => i[1]),
             backgroundColor: '#8b5cf6',
             borderRadius: 5
           }]
@@ -255,13 +335,18 @@
     }
 
     function renderGraficoLocal(dados) {
-      new Chart(document.getElementById('chartLocal'), {
+      if (chartInstanceLocal) chartInstanceLocal.destroy();
+
+      // Ordena e pega os top 10 locais com mais desfechos
+      const ordenado = Object.entries(dados).sort((a,b) => b[1] - a[1]).slice(0, 10);
+
+      chartInstanceLocal = new Chart(document.getElementById('chartLocal'), {
         type: 'bar',
         data: {
-          labels: Object.keys(dados),
+          labels: ordenado.map(i => i[0]),
           datasets: [{
             label: 'Pacientes por Local',
-            data: Object.values(dados),
+            data: ordenado.map(i => i[1]),
             backgroundColor: '#3b82f6',
             borderRadius: 5
           }]
@@ -270,46 +355,23 @@
       });
     }
 
-    function renderTabela(lista) {
-      const tbody = document.getElementById('tabelaBody');
-      tbody.innerHTML = '';
-
-      if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Nenhum registro encontrado.</td></tr>`;
-        return;
-      }
-
-      lista.forEach(p => {
-        const sitLower = p.situacao.toLowerCase();
-        let badgeClass = 'badge-outro';
-        if (sitLower.includes('alta')) badgeClass = 'badge-alta';
-        if (sitLower.includes('obito') || sitLower.includes('óbito')) badgeClass = 'badge-obito';
-
-        tbody.innerHTML += `
-          <tr>
-            <td><strong>${p.local}</strong></td>
-            <td>${p.prontuario}</td>
-            <td>${p.nome}</td>
-            <td>${p.dieta}</td>
-            <td><span class="badge ${badgeClass}">${p.situacao}</span></td>
-            <td>${p.orientacoes || '<span style="color:#cbd5e1;">-</span>'}</td>
-          </tr>
-        `;
-      });
-    }
-
-    // Filtro de busca na tabela
+    // Busca com atraso (debounce) para não travar a digitação
+    let timeoutBusca = null;
     document.getElementById('searchInput').addEventListener('input', function(e) {
-      const termo = e.target.value.toLowerCase();
-      const filtrados = listaPacientes.filter(p => 
-        p.nome.toLowerCase().includes(termo) ||
-        p.local.toLowerCase().includes(termo) ||
-        p.dieta.toLowerCase().includes(termo) ||
-        p.situacao.toLowerCase().includes(termo) ||
-        p.orientacoes.toLowerCase().includes(termo) ||
-        p.prontuario.toLowerCase().includes(termo)
-      );
-      renderTabela(filtrados);
+      clearTimeout(timeoutBusca);
+      timeoutBusca = setTimeout(() => {
+        const termo = e.target.value.toLowerCase();
+        listaFiltrada = listaPacientes.filter(p => 
+          p.nome.toLowerCase().includes(termo) ||
+          p.local.toLowerCase().includes(termo) ||
+          p.dieta.toLowerCase().includes(termo) ||
+          p.situacao.toLowerCase().includes(termo) ||
+          p.orientacoes.toLowerCase().includes(termo) ||
+          p.prontuario.toLowerCase().includes(termo)
+        );
+        paginaAtual = 1;
+        renderTabelaPaginada();
+      }, 250);
     });
   </script>
 </body>
