@@ -174,6 +174,18 @@
       'Outros': '#94a3b8'                      // Cinza Neutro
     };
 
+    // Unificação de Setores Emergenciais para "EMA"
+    function normalizarLocal(texto) {
+      if (!texto) return 'Não informado';
+      let str = String(texto).trim();
+      let upper = str.toUpperCase();
+
+      if (upper.includes('EMA') || upper.includes('UAD') || upper.includes('EMERGÊNCIA') || upper.includes('EMERGENCIA')) {
+        return 'EMA';
+      }
+      return str;
+    }
+
     function normalizarDesfecho(texto) {
       if (!texto) return 'Outros';
       const s = texto.toLowerCase();
@@ -223,9 +235,10 @@
           if (!nomeBruto) return null;
 
           const desfechoPadrao = normalizarDesfecho(String(row[idxSituacao] || ''));
+          const localPadrao = normalizarLocal(row[idxLocal]);
 
           return {
-            local: String(row[idxLocal] || 'Não informado').trim(),
+            local: localPadrao,
             prontuario: anonimizarProntuario(row[idxPront]),
             nome: anonimizarNome(nomeBruto),
             dieta: String(row[idxDieta] || 'Sem informação').trim(),
@@ -274,7 +287,7 @@
       document.getElementById('pctObitos').textContent = total ? `${((obitos/total)*100).toFixed(1)}% do total` : '0%';
       document.getElementById('kpiOrientacoes').textContent = comOrientacao.toLocaleString('pt-BR');
 
-      // Gráfico de Rosca com Cores Vivas e Marcantes
+      // Gráfico de Rosca
       new Chart(document.getElementById('chartSituacao'), {
         type: 'doughnut',
         data: {
@@ -323,7 +336,7 @@
         }
       });
 
-      // Gráfico de Locais
+      // Gráfico de Locais (Com EMA Unificado)
       const topLocais = Object.entries(contagemLocal).sort((a,b) => b[1] - a[1]).slice(0, 10);
       new Chart(document.getElementById('chartLocal'), {
         type: 'bar',
