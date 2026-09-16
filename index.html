@@ -20,61 +20,66 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 0 1rem 2rem 1rem; max-width: 1300px; margin: 0 auto; }
+    
+    body { 
+      background-color: var(--bg); 
+      color: var(--text); 
+      margin: 0; 
+      padding: 0; 
+    }
 
-    /* --- MENU DE NAVEGAÇÃO INTEGRADO AO DESIGN --- */
+    /* --- CABEÇALHO IDÊNTICO AO ORIGINAL (LARGURA TOTAL) --- */
     .top-nav {
-      background-color: var(--card-bg);
-      border-bottom: 1px solid var(--border);
-      margin: 0 -1rem 2rem -1rem;
-      padding: 0 1.5rem;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      background-color: #004b8d; /* Azul HCPA */
+      width: 100%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     .nav-container {
-      max-width: 1300px;
+      max-width: 1400px;
       margin: 0 auto;
+      height: 50px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      height: 60px;
+      justify-content: center;
+      position: relative;
+      padding: 0 1.5rem;
     }
     .nav-brand {
-      color: var(--text);
+      color: #ffffff;
       font-weight: 700;
       font-size: 0.95rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .nav-brand::before {
-      content: "";
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      background-color: var(--primary);
-      border-radius: 50%;
+      letter-spacing: 0.2px;
     }
     .nav-links {
+      position: absolute;
+      right: 1.5rem;
       display: flex;
-      gap: 6px;
+      gap: 8px;
+      align-items: center;
     }
     .nav-item {
-      color: var(--muted);
+      color: rgba(255, 255, 255, 0.9);
       text-decoration: none;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      padding: 7px 14px;
+      padding: 6px 14px;
       border-radius: 6px;
-      transition: all 0.2s ease;
+      transition: background-color 0.2s ease;
     }
     .nav-item:hover {
-      color: var(--primary);
-      background-color: #f1f5f9;
+      background-color: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
     }
     .nav-item.active {
-      color: var(--primary);
-      background-color: #eff6ff;
-      border: 1px solid #bfdbfe;
+      background-color: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }
+
+    /* CONTAINER DO CONTEÚDO PRINCIPAL */
+    .main-container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
     }
 
     header { text-align: center; margin-bottom: 2rem; }
@@ -125,10 +130,10 @@
 </head>
 <body>
 
-  <!-- MENU DE NAVEGAÇÃO SUPERIOR INTEGRADO -->
+  <!-- CABEÇALHO SUPERIOR (100% LARGURA) -->
   <nav class="top-nav">
     <div class="nav-container">
-      <span class="nav-brand">Fonoaudiologia — HCPA</span>
+      <div class="nav-brand">Fonoaudiologia — HCPA</div>
       <div class="nav-links">
         <a href="https://marvinsilva.github.io/dashboardfono/" class="nav-item">Dashboard Gestão</a>
         <a href="https://marvinsilva.github.io/disfagiaadulto/" class="nav-item active">Indicadores de Altas</a>
@@ -136,91 +141,93 @@
     </div>
   </nav>
 
-  <header>
-    <h1>Indicadores de Altas Disfagia Adulto</h1>
-    <p class="subtitle">Acompanhamento de desfechos, dietas prescritas e orientações fonoaudiológicas</p>
-  </header>
+  <main class="main-container">
+    <header>
+      <h1>Indicadores de Altas Disfagia Adulto</h1>
+      <p class="subtitle">Acompanhamento de desfechos, dietas prescritas e orientações fonoaudiológicas</p>
+    </header>
 
-  <!-- KPIs -->
-  <section class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-title">Total de Pacientes</div>
-      <div class="kpi-value" id="kpiTotal">0</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Altas</div>
-      <div class="kpi-value" style="color: var(--success);" id="kpiAltas">0</div>
-      <div class="kpi-sub" id="pctAltas">0% do total</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Óbitos</div>
-      <div class="kpi-value" style="color: var(--danger);" id="kpiObitos">0</div>
-      <div class="kpi-sub" id="pctObitos">0% do total</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Com Orientações de Alta</div>
-      <div class="kpi-value" style="color: var(--purple);" id="kpiOrientacoes">0</div>
-    </div>
-  </section>
-
-  <!-- GRÁFICOS -->
-  <section class="charts-grid">
-    <div class="panel">
-      <h2 class="panel-title">Proporção por Desfecho</h2>
-      <div class="chart-container-large">
-        <canvas id="chartSituacao"></canvas>
+    <!-- KPIs -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Total de Pacientes</div>
+        <div class="kpi-value" id="kpiTotal">0</div>
       </div>
-    </div>
-
-    <div class="panel">
-      <h2 class="panel-title">Distribuição por Dieta na Saída</h2>
-      <div class="chart-container-large">
-        <canvas id="chartDieta"></canvas>
+      <div class="kpi-card">
+        <div class="kpi-title">Altas</div>
+        <div class="kpi-value" style="color: var(--success);" id="kpiAltas">0</div>
+        <div class="kpi-sub" id="pctAltas">0% do total</div>
       </div>
-    </div>
-
-    <div class="panel" style="grid-column: 1 / -1;">
-      <h2 class="panel-title">Top Setores com mais Desfechos</h2>
-      <canvas id="chartLocal" style="max-height: 300px;"></canvas>
-    </div>
-  </section>
-
-  <!-- TABELA DE PACIENTES -->
-  <section class="panel">
-    <div class="controls">
-      <h2 class="panel-title" style="margin-bottom:0;">Lista Completa de Pacientes</h2>
-      <input type="text" id="searchInput" class="search-input" placeholder="Buscar por paciente, prontuário, dieta, local...">
-    </div>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Local</th>
-            <th>Prontuário</th>
-            <th>Paciente</th>
-            <th>Dieta</th>
-            <th>Situação</th>
-            <th>Orientações de Alta</th>
-          </tr>
-        </thead>
-        <tbody id="tabelaBody">
-          <tr><td colspan="6" style="text-align: center;">Carregando dados...</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="pagination">
-      <span id="pageInfo">Página 1</span>
-      <div>
-        <button id="btnPrev" class="pagination-btn" onclick="mudarPagina(-1)">Anterior</button>
-        <button id="btnNext" class="pagination-btn" onclick="mudarPagina(1)">Próxima</button>
+      <div class="kpi-card">
+        <div class="kpi-title">Óbitos</div>
+        <div class="kpi-value" style="color: var(--danger);" id="kpiObitos">0</div>
+        <div class="kpi-sub" id="pctObitos">0% do total</div>
       </div>
-    </div>
-  </section>
+      <div class="kpi-card">
+        <div class="kpi-title">Com Orientações de Alta</div>
+        <div class="kpi-value" style="color: var(--purple);" id="kpiOrientacoes">0</div>
+      </div>
+    </section>
 
-  <footer>
-    <p class="dev-credits">Desenvolvido por Fgo Marvin Azevedo</p>
-  </footer>
+    <!-- GRÁFICOS -->
+    <section class="charts-grid">
+      <div class="panel">
+        <h2 class="panel-title">Proporção por Desfecho</h2>
+        <div class="chart-container-large">
+          <canvas id="chartSituacao"></canvas>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Distribuição por Dieta na Saída</h2>
+        <div class="chart-container-large">
+          <canvas id="chartDieta"></canvas>
+        </div>
+      </div>
+
+      <div class="panel" style="grid-column: 1 / -1;">
+        <h2 class="panel-title">Top Setores com mais Desfechos</h2>
+        <canvas id="chartLocal" style="max-height: 300px;"></canvas>
+      </div>
+    </section>
+
+    <!-- TABELA DE PACIENTES -->
+    <section class="panel">
+      <div class="controls">
+        <h2 class="panel-title" style="margin-bottom:0;">Lista Completa de Pacientes</h2>
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar por paciente, prontuário, dieta, local...">
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Local</th>
+              <th>Prontuário</th>
+              <th>Paciente</th>
+              <th>Dieta</th>
+              <th>Situação</th>
+              <th>Orientações de Alta</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaBody">
+            <tr><td colspan="6" style="text-align: center;">Carregando dados...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <span id="pageInfo">Página 1</span>
+        <div>
+          <button id="btnPrev" class="pagination-btn" onclick="mudarPagina(-1)">Anterior</button>
+          <button id="btnNext" class="pagination-btn" onclick="mudarPagina(1)">Próxima</button>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p class="dev-credits">Desenvolvido por Fgo Marvin Azevedo</p>
+    </footer>
+  </main>
 
   <script>
     let listaPacientes = [];
