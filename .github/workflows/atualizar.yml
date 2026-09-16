@@ -2,8 +2,11 @@ name: Atualizar Dados Diariamente
 
 on:
   schedule:
-    - cron: '0 3 * * *' # Executa todo dia à meia-noite (horário de Brasília)
-  workflow_dispatch: # Permite rodar manualmente quando quiser
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   download-data:
@@ -14,11 +17,16 @@ jobs:
 
       - name: Baixar JSON da Planilha
         run: |
-          curl -sL "https://script.google.com/macros/s/AKfycbxrCbQZsAVjMoPzDz-6vuyLKjlMH7m0E1BlIzdtPmgSUYaoBk75O2G0UdWF_uWPD7nE/exec -o dados.json
+          curl -sL "COLE_A_SUA_URL_DO_APPS_SCRIPT_AQUI" -o dados.json
+          head -n 5 dados.json
 
-      - name: Salvar no repositório
+      - name: Configurar Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Salvar alterações no repositório
+        run: |
           git add dados.json
-          git diff-index --quiet HEAD || (git commit -m "bot: dados atualizados" && git push)
+          git commit -m "bot: dados atualizados" || echo "Nenhuma mudança para commitar"
+          git push
