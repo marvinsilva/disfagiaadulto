@@ -248,30 +248,40 @@
 
       const reader = new FileReader();
       reader.onload = function(evt) {
-        const data = new Uint8Array(evt.target.result);
-        const workbook = XLSX.read(data, {type: 'array'});
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, {type: 'array'});
 
-        // Encontra a aba com '2026' ou 'alta' ou usa a primeira
-        const sheetName = workbook.SheetNames.find(s => {
-          const l = s.toLowerCase();
-          return l.includes('2026') || l.includes('alta') || l.includes('obito');
-        }) || workbook.SheetNames[0];
+          // Encontra a aba com '2026' ou 'alta' ou usa a primeira
+          const sheetName = workbook.SheetNames.find(s => {
+            const l = s.toLowerCase();
+            return l.includes('2026') || l.includes('alta') || l.includes('obito');
+          }) || workbook.SheetNames[0];
 
-        const worksheet = workbook.Sheets[sheetName];
-        const matriz = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+          const worksheet = workbook.Sheets[sheetName];
+          const matriz = XLSX.utils.sheet_to_json(worksheet, {header: 1});
 
-        if (!matriz || matriz.length <= 1) {
-          alert('Nenhum dado encontrado na planilha selecionada.');
-          return;
+          if (!matriz || matriz.length <= 1) {
+            alert('Nenhum dado encontrado na planilha selecionada.');
+            return;
+          }
+
+          processarMatriz(matriz);
+        } catch (err) {
+          console.error(err);
+          alert('Erro ao ler a planilha. Verifique se o arquivo está correto.');
         }
-
-        processarMatriz(matriz);
       };
       reader.readAsArrayBuffer(file);
     }
 
     function processarMatriz(matriz) {
-      const cabecalhos = matriz[0].map(c => String(c).trim().toLowerCase());
+      if (!matriz || matriz.length <= 1) return;
+
+      // Tratamento seguro dos cabeçalhos contra células vazias/undefined
+      const primeiraLinha = matriz[0] || [];
+      const cabecalhos = primeiraLinha.map(c => (c !== null && c !== undefined) ? String(c).trim().toLowerCase() : '');
+
       const idxLocal = cabecalhos.findIndex(c => c.includes('local'));
       const idxPront = cabecalhos.findIndex(c => c.includes('prontu'));
       const idxNome = cabecalhos.findIndex(c => c.includes('nome') || c.includes('paciente'));
@@ -279,19 +289,29 @@
       const idxSituacao = cabecalhos.findIndex(c => c.includes('situa') || c.includes('desfecho'));
       const idxOrient = cabecalhos.findIndex(c => c.includes('orienta'));
 
+      // Função auxiliar para pegar valor seguro de qualquer coluna
+      const getVal = (row, idx) => (idx !== -1 && row && row[idx] !== undefined && row[idx] !== null) ? String(row[idx]).trim() : '';
+
       listaPacientes = matriz.slice(1).map(row => {
-        const nomeBruto = String(row[idxNome] || '').trim();
+        if (!row || row.length === 0) return null;
+
+        const nomeBruto = getVal(row, idxNome);
         if (!nomeBruto) return null;
 
         return {
-          local: normalizarLocal(row[idxLocal]),
-          prontuario: anonimizarProntuario(row[idxPront]),
+          local: normalizarLocal(getVal(row, idxLocal)),
+          prontuario: anonimizarProntuario(getVal(row, idxPront)),
           nome: anonimizarNome(nomeBruto),
-          dieta: String(row[idxDieta] || 'Sem informação').trim(),
-          situacao: normalizarDesfecho(String(row[idxSituacao] || '')),
-          orientacoes: String(row[idxOrient] || '').trim()
+          dieta: getVal(row, idxDieta) || 'Sem informação',
+          situacao: normalizarDesfecho(getVal(row, idxSituacao)),
+          orientacoes: getVal(row, idxOrient)
         };
       }).filter(p => p !== null);
+
+      if (listaPacientes.length === 0) {
+        alert('Nenhum paciente válido encontrado na planilha. Verifique se os nomes das colunas estão corretos.');
+        return;
+      }
 
       listaFiltrada = [...listaPacientes];
       document.getElementById('dashboardArea').style.display = 'block';
