@@ -12,13 +12,37 @@
     ""
   ],
   [
+    "EMA, NEV",
+    1674902,
+    "EDUARDO MANUEL BUGARIN",
+    "NPO",
+    "Transf CTI",
     "",
     "",
     "",
     "",
+    ""
+  ],
+  [
+    "NEV",
+    18480822,
+    "JOEL FERNANDO DA SILVA FONSECA",
+    "VO BRANDA",
+    "Alta hospitalar",
+    "Luísa",
+    "SIM",
     "",
     "",
-    "",
+    ""
+  ],
+  [
+    "CIG",
+    14412928,
+    "LIDIA CASTRO DOMINGUES DA SILVA",
+    "VO LIQUIDIFICADA",
+    "Alta hospitalar",
+    "Luísa",
+    "SIM",
     "",
     "",
     ""
@@ -228,11 +252,11 @@
     ""
   ],
   [
-    "CTI, NEV",
+    "CTI, Neurologia",
     18489526,
     "WESLEY VINICIUS DA SILVA GONCALVES",
     "VO BRANDA",
-    "Transf NEUROFONO",
+    "Alta para enfermaria (EMA)",
     "Gabriela",
     "N/A ",
     "",
