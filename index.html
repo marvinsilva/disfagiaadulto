@@ -87,7 +87,7 @@
 
   <header>
     <h1>Indicadores de Altas Disfagia Adulto 2026</h1>
-    <p class="subtitle">Acompanhamento local seguro de desfechos e dietas prescritas</p>
+    <p class="subtitle" id="nomeAbaCarregada">Acompanhamento local seguro de desfechos e dietas prescritas</p>
   </header>
 
   <!-- ÁREA DE CARREGAMENTO DE ARQUIVO LOCAL -->
@@ -241,6 +241,8 @@
       return '***' + str.slice(-3);
     }
 
+    const normalizarTexto = str => String(str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
     // Leitura do Arquivo Local
     function carregarArquivo(e) {
       const file = e.target.files[0];
@@ -252,17 +254,22 @@
           const data = new Uint8Array(evt.target.result);
           const workbook = XLSX.read(data, {type: 'array'});
 
-          // Encontra a aba com '2026' ou 'alta' ou usa a primeira
+          // Busca especificamente pela aba "2026 ALTA/ÓBITO" ou variações
           const sheetName = workbook.SheetNames.find(s => {
-            const l = s.toLowerCase();
-            return l.includes('2026') || l.includes('alta') || l.includes('obito');
+            const norm = normalizarTexto(s);
+            return norm.includes('2026') && (norm.includes('alta') || norm.includes('obito'));
+          }) || workbook.SheetNames.find(s => {
+            const norm = normalizarTexto(s);
+            return norm.includes('2026') || norm.includes('alta') || norm.includes('obito');
           }) || workbook.SheetNames[0];
+
+          document.getElementById('nomeAbaCarregada').textContent = `Aba analisada: "${sheetName}"`;
 
           const worksheet = workbook.Sheets[sheetName];
           const matriz = XLSX.utils.sheet_to_json(worksheet, {header: 1});
 
           if (!matriz || matriz.length <= 1) {
-            alert('Nenhum dado encontrado na planilha selecionada.');
+            alert('Nenhum dado encontrado na aba da planilha.');
             return;
           }
 
@@ -278,21 +285,40 @@
     function processarMatriz(matriz) {
       if (!matriz || matriz.length <= 1) return;
 
-      // Tratamento seguro dos cabeçalhos contra células vazias/undefined
-      const primeiraLinha = matriz[0] || [];
+      // Procura a linha do cabeçalho nas 10 primeiras linhas da planilha
+      let headerRowIdx = 0;
+      let maxMatches = -1;
+
+      for (let r = 0; r < Math.min(10, matriz.length); r++) {
+        const linhaArr = Array.from(matriz[r] || []).map(c => (c !== null && c !== undefined) ? String(c).trim().toLowerCase() : '');
+        let matches = 0;
+        if (linhaArr.some(c => c.includes('nome') || c.includes('paciente'))) matches += 2;
+        if (linhaArr.some(c => c.includes('local'))) matches += 1;
+        if (linhaArr.some(c => c.includes('prontu'))) matches += 1;
+        if (linhaArr.some(c => c.includes('dieta'))) matches += 1;
+        if (linhaArr.some(c => c.includes('situa') || c.includes('desfecho'))) matches += 1;
+        if (linhaArr.some(c => c.includes('orienta'))) matches += 1;
+
+        if (matches > maxMatches && matches >= 2) {
+          maxMatches = matches;
+          headerRowIdx = r;
+        }
+      }
+
+      // Array.from preenche buracos de sparse array para evitar 'c is undefined'
+      const primeiraLinha = Array.from(matriz[headerRowIdx] || []);
       const cabecalhos = primeiraLinha.map(c => (c !== null && c !== undefined) ? String(c).trim().toLowerCase() : '');
 
-      const idxLocal = cabecalhos.findIndex(c => c.includes('local'));
-      const idxPront = cabecalhos.findIndex(c => c.includes('prontu'));
-      const idxNome = cabecalhos.findIndex(c => c.includes('nome') || c.includes('paciente'));
-      const idxDieta = cabecalhos.findIndex(c => c.includes('dieta'));
-      const idxSituacao = cabecalhos.findIndex(c => c.includes('situa') || c.includes('desfecho'));
-      const idxOrient = cabecalhos.findIndex(c => c.includes('orienta'));
+      const idxLocal = cabecalhos.findIndex(c => (c || '').includes('local'));
+      const idxPront = cabecalhos.findIndex(c => (c || '').includes('prontu'));
+      const idxNome = cabecalhos.findIndex(c => (c || '').includes('nome') || (c || '').includes('paciente'));
+      const idxDieta = cabecalhos.findIndex(c => (c || '').includes('dieta'));
+      const idxSituacao = cabecalhos.findIndex(c => (c || '').includes('situa') || (c || '').includes('desfecho'));
+      const idxOrient = cabecalhos.findIndex(c => (c || '').includes('orienta'));
 
-      // Função auxiliar para pegar valor seguro de qualquer coluna
       const getVal = (row, idx) => (idx !== -1 && row && row[idx] !== undefined && row[idx] !== null) ? String(row[idx]).trim() : '';
 
-      listaPacientes = matriz.slice(1).map(row => {
+      listaPacientes = matriz.slice(headerRowIdx + 1).map(row => {
         if (!row || row.length === 0) return null;
 
         const nomeBruto = getVal(row, idxNome);
@@ -347,12 +373,10 @@
       document.getElementById('pctObitos').textContent = total ? `${((obitos/total)*100).toFixed(1)}% do total` : '0%';
       document.getElementById('kpiOrientacoes').textContent = comOrientacao.toLocaleString('pt-BR');
 
-      // Limpa instâncias antigas de gráficos
       if (chartSituacaoInstance) chartSituacaoInstance.destroy();
       if (chartDietaInstance) chartDietaInstance.destroy();
       if (chartLocalInstance) chartLocalInstance.destroy();
 
-      // Rosca
       chartSituacaoInstance = new Chart(document.getElementById('chartSituacao'), {
         type: 'doughnut',
         data: {
@@ -362,7 +386,6 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11, weight: '500' }, padding: 12, boxWidth: 14 } } } }
       });
 
-      // Dietas
       const topDietas = Object.entries(contagemDieta).sort((a,b) => b[1] - a[1]).slice(0, 6);
       chartDietaInstance = new Chart(document.getElementById('chartDieta'), {
         type: 'bar',
@@ -370,7 +393,6 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
-      // Locais
       const topLocais = Object.entries(contagemLocal).sort((a,b) => b[1] - a[1]).slice(0, 10);
       chartLocalInstance = new Chart(document.getElementById('chartLocal'), {
         type: 'bar',
